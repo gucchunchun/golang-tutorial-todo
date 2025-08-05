@@ -17,29 +17,29 @@ type Task struct {
 	DueDate   string `json:"due_date"`
 }
 
-func Add(input string) (result string) {
+func Add(taskName string, setDueDate bool, dueDate string) (result string) {
 	// Task27: Regex
-	if match, err := regexp.MatchString("[a-z]+", input); err != nil || !match {
+	if match, err := regexp.MatchString("[a-z]+", taskName); err != nil || !match {
 		fmt.Println("Error: Task must be a valid string")
 		return
 	}
 
-	task := strings.ReplaceAll(input, `"`, ``)
+	task := strings.ReplaceAll(taskName, `"`, ``)
 	if task == "" {
 		fmt.Println("Error: Task cannot be empty")
 		return
 	}
 
-	if err := AddTask("tasks.json", task); err != nil {
+	if err := AddTask("tasks.json", task, setDueDate, dueDate); err != nil {
 		fmt.Println("Error: Saving tasks:", err)
 		return
 	}
 	return fmt.Sprintf("Task added: %s\n", task)
 
 }
-func AddTask(filename, input string) error {
+func AddTask(filename, taskName string, setDueDate bool, dueDate string) error {
 	// Task27: Regex
-	if match, err := regexp.MatchString("[a-zA-Z]+", input); err != nil || !match {
+	if match, err := regexp.MatchString("[a-zA-Z]+", taskName); err != nil || !match {
 		return fmt.Errorf("invalid task name")
 	}
 
@@ -49,13 +49,12 @@ func AddTask(filename, input string) error {
 		return err
 	}
 
-	// Create new task
 	newTask := Task{
 		ID:        uint(len(tasks) + 1), // Simple ID generation
-		Name:      strings.TrimSpace(input),
+		Name:      strings.TrimSpace(taskName),
 		Status:    0,
 		CreatedAt: time.Now().Format(time.RFC3339),
-		DueDate:   "",
+		DueDate:   dueDate,
 	}
 
 	// Append and save
@@ -73,7 +72,6 @@ func LoadTasks(filename string) ([]Task, error) {
 		return nil, err
 	}
 
-	// Check if the file is empty
 	if len(data) == 0 {
 		return []Task{}, nil
 	}
