@@ -4,6 +4,8 @@ import (
 	"fmt"
 
 	"github.com/spf13/cobra"
+
+	"golang/tutorial/todo/internal/services/task"
 )
 
 var setDueDate bool
@@ -19,9 +21,9 @@ var addCmd = &cobra.Command{
 			fmt.Println("Error: Task name is required")
 			return
 		case 1:
-			fmt.Printf("%s\n", Add(args[0], setDueDate, ""))
+			fmt.Printf("%s\n", task.AddTask("tasks.json", args[0], setDueDate, ""))
 		case 2:
-			fmt.Printf("%s\n", Add(args[0], setDueDate, args[1]))
+			fmt.Printf("%s\n", task.AddTask("tasks.json", args[0], setDueDate, args[1]))
 		default:
 			fmt.Println("Error: Too many arguments")
 		}
