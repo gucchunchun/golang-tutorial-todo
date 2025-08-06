@@ -16,7 +16,7 @@ func FormatTaskOutput(id uint, name, status string, createdAt, dueDate time.Time
 	timeLeft, _ := formatTimeLeft(dueDate)
 
 	// 左揃え＋固定幅でフォーマット
-	return fmt.Sprintf("%-4d | %-20s | %-8s | %-19s | %-10s | %-15s",
+	return fmt.Sprintf("%-4d | %-20s | %-8s | %-19s | %-11s | %-15s",
 		id, name, status, createdAtOutput, dueDateOutput, timeLeft)
 }
 
