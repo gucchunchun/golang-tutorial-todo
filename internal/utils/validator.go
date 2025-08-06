@@ -1,6 +1,8 @@
 package utils
 
-import "regexp"
+import (
+	"regexp"
+)
 
 func IsValidTaskName(input string) bool {
 	// Task27: Regex

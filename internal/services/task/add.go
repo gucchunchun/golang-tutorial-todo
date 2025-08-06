@@ -20,12 +20,21 @@ func AddTask(filename, taskName string, setDueDate bool, dueDate string) error {
 		return err
 	}
 
+	var dueDateTime time.Time
+	if setDueDate {
+		parsedDueDate, err := utils.ParseDate(dueDate)
+		if err != nil {
+			return fmt.Errorf("failed to parse due date: %v", err)
+		}
+		dueDateTime = parsedDueDate
+	}
+
 	newTask := models.Task{
 		ID:        uint(len(tasks) + 1),
 		Name:      strings.TrimSpace(taskName),
 		Status:    models.Pending,
-		CreatedAt: time.Now().Format(time.RFC3339),
-		DueDate:   dueDate,
+		CreatedAt: utils.Now(),
+		DueDate:   &dueDateTime,
 	}
 
 	tasks = append(tasks, newTask)
