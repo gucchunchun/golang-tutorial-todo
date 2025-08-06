@@ -23,7 +23,7 @@ func AddTask(filename, taskName string, setDueDate bool, dueDate string) error {
 	newTask := models.Task{
 		ID:        uint(len(tasks) + 1),
 		Name:      strings.TrimSpace(taskName),
-		Status:    0,
+		Status:    models.Pending,
 		CreatedAt: time.Now().Format(time.RFC3339),
 		DueDate:   dueDate,
 	}
