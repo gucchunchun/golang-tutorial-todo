@@ -61,7 +61,7 @@ ID | Name | Status | CreatedAt | DueDate | TimeLeft
 **コマンド例：**
 
 ```bash
-todo done 3
+todo update 3 --status done
 ```
 
 ➡ **ステータス**を `pending` → `done` に変更。
@@ -164,7 +164,7 @@ ID | Name | Status | CreatedAt | DueDate | TimeLeft
 **Command:**
 
 ```bash
-todo done 3
+todo update 3 --status done
 ```
 
 ➡ Changes **status** from `pending` → `done`.

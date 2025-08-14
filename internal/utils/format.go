@@ -3,6 +3,8 @@ package utils
 import (
 	"fmt"
 	"time"
+
+	"github.com/google/uuid"
 )
 
 const (
@@ -10,14 +12,14 @@ const (
 	DatetimeFormatOutput = DateFormatOutput + " 15:04:05"
 )
 
-func FormatTaskOutput(id uint, name, status string, createdAt, dueDate time.Time) string {
+func FormatTaskOutput(id uuid.UUID, name, status string, createdAt, dueDate time.Time) string {
 	createdAtOutput, _ := formatDatetime(createdAt)
 	dueDateOutput, _ := formatDate(dueDate)
 	timeLeft, _ := formatTimeLeft(dueDate)
 
 	// 左揃え＋固定幅でフォーマット
-	return fmt.Sprintf("%-4d | %-20s | %-8s | %-19s | %-11s | %-15s",
-		id, name, status, createdAtOutput, dueDateOutput, timeLeft)
+	return fmt.Sprintf("%-16s | %-20s | %-8s | %-19s | %-11s | %-15s",
+		id.String(), name, status, createdAtOutput, dueDateOutput, timeLeft)
 }
 
 func formatDate(date time.Time) (string, error) {

@@ -1,6 +1,12 @@
 package models
 
-import "time"
+import (
+	"fmt"
+	"strings"
+	"time"
+
+	"github.com/google/uuid"
+)
 
 type Status int
 
@@ -23,8 +29,21 @@ func (s Status) String() string {
 	}
 }
 
+func ParseStatus(input string) (Status, error) {
+	switch strings.ToLower(input) {
+	case "pending":
+		return Pending, nil
+	case "ongoing":
+		return Ongoing, nil
+	case "done":
+		return Done, nil
+	default:
+		return -1, fmt.Errorf("invalid status: %s", input)
+	}
+}
+
 type Task struct {
-	ID        uint       `json:"id"`
+	ID        uuid.UUID  `json:"id"`
 	Name      string     `json:"name"`
 	Status    Status     `json:"status"`
 	CreatedAt time.Time  `json:"created_at"`
@@ -32,10 +51,16 @@ type Task struct {
 }
 
 type TaskOutput struct {
-	ID        uint   `json:"id"`
-	Name      string `json:"name"`
-	Status    string `json:"status"`
-	CreatedAt string `json:"created_at"`
-	DueDate   string `json:"due_date"`
-	TimeLeft  string `json:"time_left"`
+	ID        string
+	Name      string
+	Status    string
+	CreatedAt string
+	DueDate   string
+	TimeLeft  string
+}
+
+type TaskUpdate struct {
+	Status *Status
+	Due    *time.Time
+	Name   *string
 }

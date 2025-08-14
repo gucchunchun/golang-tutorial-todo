@@ -21,7 +21,7 @@ func newListCmd() *cobra.Command {
 			}
 
 			// ヘッダーを表示
-			fmt.Println("ID   | Name                 | Status   | CreatedAt           | DueDate     | TimeLeft")
+			fmt.Println("ID                                   | Name                 | Status   | CreatedAt           | DueDate     | TimeLeft")
 			fmt.Println("-----------------------------------------------------------------------------------------")
 			for _, row := range rows {
 				fmt.Println(row)

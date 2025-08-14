@@ -5,6 +5,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/google/uuid"
+
 	"golang/tutorial/todo/internal/models"
 	"golang/tutorial/todo/internal/storage"
 	"golang/tutorial/todo/internal/utils"
@@ -29,8 +31,13 @@ func AddTask(filename, taskName string, setDueDate bool, dueDate string) error {
 		dueDateTime = parsedDueDate
 	}
 
+	id, err := uuid.NewRandom()
+	if err != nil {
+		return fmt.Errorf("failed to generate unique ID: %v", err)
+	}
+
 	newTask := models.Task{
-		ID:        uint(len(tasks) + 1),
+		ID:        id,
 		Name:      strings.TrimSpace(taskName),
 		Status:    models.Pending,
 		CreatedAt: utils.Now(),
