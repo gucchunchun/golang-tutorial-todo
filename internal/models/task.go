@@ -45,19 +45,16 @@ const (
 	Done
 )
 
+// NOTE: "[...]" はコンパイラに配列のサイズを推測させるために使用。
+// ここでは、Statusの値に対応する文字列（３）を定義しています。
+var statusNames = [...]string{"Pending", "Ongoing", "Done"}
+
 func (s Status) String() string {
-	switch s {
-	case Pending:
-		return "Pending"
-	case Ongoing:
-		return "Ongoing"
-	case Done:
-		return "Done"
-	default:
+	if s < Pending || s > Done {
 		return "Unknown"
 	}
+	return statusNames[s]
 }
-
 func ParseStatus(input string) (Status, error) {
 	switch strings.ToLower(input) {
 	case "pending":
