@@ -13,6 +13,7 @@ import (
 )
 
 var setDueDate bool
+var sayQuote bool
 
 func newAddCmd() *cobra.Command {
 	var addCmd = &cobra.Command{
@@ -40,10 +41,20 @@ func newAddCmd() *cobra.Command {
 				return
 			}
 			fmt.Println("task added successfully")
+
+			if sayQuote {
+				quote, err := svc.GetRandomQuote()
+				if err != nil {
+					fmt.Printf("Error fetching quote: %v\n", err)
+					return
+				}
+				fmt.Printf("Here's a quote for you: %s\n", quote)
+			}
 		},
 	}
 
 	addCmd.Flags().BoolVarP(&setDueDate, "due", "d", false, "Set a due date for the task")
+	addCmd.Flags().BoolVarP(&sayQuote, "quote", "q", false, "Say a quote after adding the task")
 
 	return addCmd
 }

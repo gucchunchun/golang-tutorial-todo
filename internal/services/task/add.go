@@ -1,6 +1,7 @@
 package task
 
 import (
+	"context"
 	"fmt"
 	"time"
 
@@ -34,4 +35,12 @@ func (s *Service) AddTask(taskName string, setDueDate bool, dueDate string) erro
 
 	tasks = append(tasks, newTask)
 	return s.storage.SaveTasks(tasks)
+}
+
+func (s *Service) GetRandomQuote() (string, error) {
+	quote, err := s.quoteClient.RandomQuote(context.Background())
+	if err != nil {
+		return "", fmt.Errorf("failed to get random quote: %v", err)
+	}
+	return fmt.Sprintf("%s - %s", quote.Author, quote.Text), nil
 }

@@ -8,8 +8,8 @@ import (
 )
 
 type Quote struct {
-	Text   string `json:"text"`
-	Author string `json:"author,omitempty"`
+	Text   string `json:"q"`
+	Author string `json:"a,omitempty"`
 }
 
 type Client interface {
@@ -57,10 +57,10 @@ func (c *HTTPClient) RandomQuote(ctx context.Context) (Quote, error) {
 		return Quote{}, &ResponseError{StatusCode: resp.StatusCode}
 	}
 
-	var quote Quote
+	var quote []Quote
 	if err := json.NewDecoder(resp.Body).Decode(&quote); err != nil {
 		return Quote{}, err
 	}
 
-	return quote, nil
+	return quote[0], nil
 }
