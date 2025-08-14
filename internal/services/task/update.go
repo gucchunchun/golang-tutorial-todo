@@ -3,13 +3,11 @@ package task
 import (
 	"fmt"
 
-	"github.com/google/uuid"
-
 	"golang/tutorial/todo/internal/models"
 	"golang/tutorial/todo/internal/storage"
 )
 
-func UpdateTask(filePath string, taskID uuid.UUID, updates models.TaskUpdate) error {
+func UpdateTask(filePath string, taskID models.TaskID, updates models.TaskUpdate) error {
 	// Load existing tasks from the file
 	tasks, err := storage.LoadTasks(filePath)
 	if err != nil {

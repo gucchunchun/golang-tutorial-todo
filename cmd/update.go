@@ -17,7 +17,7 @@ func newUpdateCmd() *cobra.Command {
 		Long:  "You can update an existing task in your todo list with this command.",
 		Args:  cobra.MinimumNArgs(1),
 		Run: func(cmd *cobra.Command, args []string) {
-			taskID, err := utils.ParseUserUUID(args[0])
+			taskID, err := models.ParseTaskID(args[0])
 			if err != nil {
 				fmt.Printf("Error parsing task ID: %v\n", err)
 				return

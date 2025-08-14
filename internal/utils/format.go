@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/google/uuid"
+	"golang/tutorial/todo/internal/models"
 )
 
 const (
@@ -12,7 +12,7 @@ const (
 	DatetimeFormatOutput = DateFormatOutput + " 15:04:05"
 )
 
-func FormatTaskOutput(id uuid.UUID, name, status string, createdAt, dueDate time.Time) string {
+func FormatTaskOutput(id models.TaskID, name, status string, createdAt, dueDate time.Time) string {
 	createdAtOutput, _ := formatDatetime(createdAt)
 	dueDateOutput, _ := formatDate(dueDate)
 	timeLeft, _ := formatTimeLeft(dueDate)
