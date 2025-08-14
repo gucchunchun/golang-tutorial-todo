@@ -73,7 +73,25 @@ type Task struct {
 	Name      string     `json:"name"`
 	Status    Status     `json:"status"`
 	CreatedAt time.Time  `json:"created_at"`
-	DueDate   *time.Time `json:"due_date"`
+	DueDate   *time.Time `json:"due_date,omitempty"`
+}
+
+func NewTask(name string, due *time.Time, now time.Time) (Task, error) {
+	name = strings.TrimSpace(name)
+	if name == "" {
+		return Task{}, fmt.Errorf("name is required")
+	}
+	if due != nil {
+		d := due.UTC()
+		due = &d
+	}
+	return Task{
+		ID:        NewTaskID(),
+		Name:      name,
+		Status:    Pending,
+		CreatedAt: now.UTC(),
+		DueDate:   due,
+	}, nil
 }
 
 type TaskOutput struct {

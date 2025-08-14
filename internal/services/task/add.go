@@ -2,7 +2,6 @@ package task
 
 import (
 	"fmt"
-	"strings"
 	"time"
 
 	"golang/tutorial/todo/internal/models"
@@ -29,12 +28,9 @@ func AddTask(filename, taskName string, setDueDate bool, dueDate string) error {
 		dueDateTime = parsedDueDate
 	}
 
-	newTask := models.Task{
-		ID:        models.NewTaskID(),
-		Name:      strings.TrimSpace(taskName),
-		Status:    models.Pending,
-		CreatedAt: utils.Now(),
-		DueDate:   &dueDateTime,
+	newTask, err := models.NewTask(taskName, &dueDateTime, utils.Now())
+	if err != nil {
+		return fmt.Errorf("failed to create new task: %v", err)
 	}
 
 	tasks = append(tasks, newTask)

@@ -23,6 +23,7 @@ func UpdateTask(filePath string, taskID models.TaskID, updates models.TaskUpdate
 				tasks[i].Status = *updates.Status
 			}
 			if updates.Due != nil {
+				*updates.Due = updates.Due.UTC()
 				tasks[i].DueDate = updates.Due
 			}
 			if updates.Name != nil {

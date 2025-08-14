@@ -26,14 +26,14 @@ func formatDate(date time.Time) (string, error) {
 	if date.IsZero() {
 		return "No due date", nil
 	}
-	return date.Format(DateFormatOutput), nil
+	return date.In(time.Local).Format(DateFormatOutput), nil
 }
 
 func formatDatetime(datetime time.Time) (string, error) {
 	if datetime.IsZero() {
 		return "No date", nil
 	}
-	return datetime.Format(DatetimeFormatOutput), nil
+	return datetime.In(time.Local).Format(DatetimeFormatOutput), nil
 }
 
 func formatTimeLeft(dueDate time.Time) (string, error) {
@@ -48,7 +48,9 @@ func formatTimeLeft(dueDate time.Time) (string, error) {
 
 	timeLeft := dueDate.Sub(now)
 	days := int(timeLeft.Hours() / 24)
-	hours := int(timeLeft.Hours()) % 24
+	if int(timeLeft.Hours())%24 != 0 {
+		days++
+	}
 
-	return fmt.Sprintf("%d days %d hours", days, hours), nil
+	return fmt.Sprintf("%d days", days), nil
 }
