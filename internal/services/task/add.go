@@ -5,16 +5,15 @@ import (
 	"time"
 
 	"golang/tutorial/todo/internal/models"
-	"golang/tutorial/todo/internal/storage"
 	"golang/tutorial/todo/internal/utils"
 )
 
-func AddTask(filename, taskName string, setDueDate bool, dueDate string) error {
+func (s *Service) AddTask(taskName string, setDueDate bool, dueDate string) error {
 	if !utils.IsValidTaskName(taskName) {
 		return fmt.Errorf("invalid task name")
 	}
 
-	tasks, err := storage.LoadTasks(filename)
+	tasks, err := s.storage.LoadTasks()
 	if err != nil {
 		return err
 	}
@@ -34,5 +33,5 @@ func AddTask(filename, taskName string, setDueDate bool, dueDate string) error {
 	}
 
 	tasks = append(tasks, newTask)
-	return storage.SaveTasks(filename, tasks)
+	return s.storage.SaveTasks(tasks)
 }

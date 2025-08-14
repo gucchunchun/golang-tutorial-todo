@@ -7,14 +7,29 @@ import (
 	"golang/tutorial/todo/internal/models"
 )
 
-func LoadTasks(filename string) ([]models.Task, error) {
+type Client interface {
+	LoadTasks() ([]models.Task, error)
+	SaveTasks(tasks []models.Task) error
+}
+
+type Storage struct {
+	fileName string
+}
+
+func New(fileName string) *Storage {
+	return &Storage{
+		fileName: fileName,
+	}
+}
+
+func (s *Storage) LoadTasks() ([]models.Task, error) {
 	// ファイルの存在チェック
-	if _, err := os.Stat(filename); os.IsNotExist(err) {
+	if _, err := os.Stat(s.fileName); os.IsNotExist(err) {
 		return []models.Task{}, nil
 	}
 
 	// ファイルの読み込み
-	data, err := os.ReadFile(filename)
+	data, err := os.ReadFile(s.fileName)
 	if err != nil {
 		return nil, err
 	}
@@ -33,10 +48,10 @@ func LoadTasks(filename string) ([]models.Task, error) {
 	return tasks, nil
 }
 
-func SaveTasks(filename string, tasks []models.Task) error {
+func (s *Storage) SaveTasks(tasks []models.Task) error {
 	data, err := json.MarshalIndent(tasks, "", "  ")
 	if err != nil {
 		return err
 	}
-	return os.WriteFile(filename, data, 0644)
+	return os.WriteFile(s.fileName, data, 0644)
 }

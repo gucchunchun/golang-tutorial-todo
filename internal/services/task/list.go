@@ -1,12 +1,11 @@
 package task
 
 import (
-	"golang/tutorial/todo/internal/storage"
 	"golang/tutorial/todo/internal/utils"
 )
 
-func ListTasks(filename string) ([]string, error) {
-	tasks, err := storage.LoadTasks(filename)
+func (s *Service) ListTasks() ([]string, error) {
+	tasks, err := s.storage.LoadTasks()
 	if err != nil {
 		return nil, err
 	}

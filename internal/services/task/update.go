@@ -4,12 +4,11 @@ import (
 	"fmt"
 
 	"golang/tutorial/todo/internal/models"
-	"golang/tutorial/todo/internal/storage"
 )
 
-func UpdateTask(filePath string, taskID models.TaskID, updates models.TaskUpdate) error {
+func (s *Service) UpdateTask(taskID models.TaskID, updates models.TaskUpdate) error {
 	// Load existing tasks from the file
-	tasks, err := storage.LoadTasks(filePath)
+	tasks, err := s.storage.LoadTasks()
 	if err != nil {
 		return err
 	}
@@ -38,5 +37,5 @@ func UpdateTask(filePath string, taskID models.TaskID, updates models.TaskUpdate
 	}
 
 	// Save the updated tasks back to the file
-	return storage.SaveTasks(filePath, tasks)
+	return s.storage.SaveTasks(tasks)
 }
