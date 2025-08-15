@@ -24,6 +24,7 @@ func init() {
 	rootCmd.AddCommand(newAddCmd())
 	rootCmd.AddCommand(newListCmd())
 	rootCmd.AddCommand(newUpdateCmd())
+	rootCmd.AddCommand(newApiCmd())
 }
 
 func Execute() {
