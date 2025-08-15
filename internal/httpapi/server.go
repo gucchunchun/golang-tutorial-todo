@@ -1,27 +1,27 @@
 package httpapi
 
 import (
-	"context"
+	"encoding/json"
 	"net/http"
 
 	"golang/tutorial/todo/internal/models"
 )
 
-type Task interface {
-	Create(ctx context.Context, title string) error
-	Get(ctx context.Context, id string) (models.Task, error)
-	List(ctx context.Context) ([]models.Task, error)
-	Update(ctx context.Context, id string, title string) error
-	Delete(ctx context.Context, id string) error
+type TaskService interface {
+	// Create(title string) error
+	// Get(id string) (models.Task, error)
+	List() ([]models.Task, error)
+	// Update(id string, title string) error
+	// Delete(id string) error
 }
 
 type Server struct {
-	// task Task
+	// TaskService TaskService
 }
 
 func New() *Server {
 	return &Server{
-		// task: task,
+		// TaskService: taskService,
 	}
 }
 
@@ -31,6 +31,19 @@ func (s *Server) Routes() http.Handler {
 	return mux
 }
 
+// NOTE: ヘルパー関数のためanyを許容
+func writeJSON(w http.ResponseWriter, statusCode int, v any) {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(statusCode)
+	_ = json.NewEncoder(w).Encode(v)
+}
+
+func writeJSONError(w http.ResponseWriter, statusCode int, message string) {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(statusCode)
+	_ = json.NewEncoder(w).Encode(map[string]string{"error": message})
+}
+
 func (s *Server) handleHelloworld(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("Hello, World!"))
+	writeJSON(w, http.StatusOK, map[string]string{"message": "Hello, World!"})
 }
