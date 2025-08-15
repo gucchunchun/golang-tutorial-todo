@@ -3,23 +3,31 @@ package httpapi
 import (
 	"encoding/json"
 	"net/http"
+
+	"golang/tutorial/todo/internal/handlers/task"
 )
 
-// type TaskHandler intercace
-
-type Server struct {
-	// TaskService TaskService
+type Handler interface {
+	Routes(mux *http.ServeMux)
 }
 
-func New() *Server {
+type Server struct {
+	handlers []Handler
+}
+
+func New(taskService task.TaskService) *Server {
 	return &Server{
-		// TaskService: taskService,
+		handlers: []Handler{task.NewTaskHandler(taskService)},
 	}
 }
 
 func (s *Server) Routes() http.Handler {
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /", s.handleHelloworld)
+	// ルーティングの設定
+	for _, h := range s.handlers {
+		h.Routes(mux)
+	}
 	return mux
 }
 

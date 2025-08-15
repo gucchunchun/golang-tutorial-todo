@@ -2,19 +2,14 @@ package cmd
 
 import (
 	"fmt"
-	"os"
-	"time"
 
 	"github.com/spf13/cobra"
 
 	"golang/tutorial/todo/internal/models"
-	"golang/tutorial/todo/internal/quotes"
-	"golang/tutorial/todo/internal/services/task"
-	"golang/tutorial/todo/internal/storage"
 	"golang/tutorial/todo/internal/utils"
 )
 
-func newUpdateCmd() *cobra.Command {
+func newUpdateCmd(svc TaskService) *cobra.Command {
 	var updateCmd = &cobra.Command{
 		Use:   "update",
 		Short: "Update an existing task",
@@ -27,7 +22,6 @@ func newUpdateCmd() *cobra.Command {
 				return
 			}
 
-			svc := task.NewService(quotes.NewHTTPClient(os.Getenv("QUOTES_BASE_URL"), 10*time.Second), storage.New("tasks.json"))
 			updates := models.TaskUpdate{}
 			if status, _ := cmd.Flags().GetString("status"); status != "" {
 				newStatus, err := models.ParseStatus(status)

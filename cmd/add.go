@@ -2,27 +2,20 @@ package cmd
 
 import (
 	"fmt"
-	"os"
-	"time"
 
 	"github.com/spf13/cobra"
-
-	"golang/tutorial/todo/internal/quotes"
-	"golang/tutorial/todo/internal/services/task"
-	"golang/tutorial/todo/internal/storage"
 )
 
 var setDueDate bool
 var sayQuote bool
 
-func newAddCmd() *cobra.Command {
+func newAddCmd(svc TaskService) *cobra.Command {
 	var addCmd = &cobra.Command{
 		Use:   "add",
 		Short: "Add new task",
 		Long:  "You can add a new task to your todo list with this command.",
 		Args:  cobra.MaximumNArgs(2),
 		Run: func(cmd *cobra.Command, args []string) {
-			svc := task.NewService(quotes.NewHTTPClient(os.Getenv("QUOTES_BASE_URL"), 10*time.Second), storage.New("tasks.json"))
 			var err error
 			switch len(args) {
 			case 0:

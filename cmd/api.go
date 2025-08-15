@@ -9,13 +9,13 @@ import (
 	"golang/tutorial/todo/internal/httpapi"
 )
 
-func RunAPI(addr string) error {
-	srv := httpapi.New()
+func RunAPI(addr string, svc TaskService) error {
+	srv := httpapi.New(svc)
 	log.Printf("listening on %s", addr)
 	return http.ListenAndServe(addr, srv.Routes())
 }
 
-func newApiCmd() *cobra.Command {
+func newApiCmd(svc TaskService) *cobra.Command {
 	var apiCmd = &cobra.Command{
 		Use:   "api",
 		Short: "Run the HTTP API server",
@@ -23,7 +23,7 @@ func newApiCmd() *cobra.Command {
 		Run: func(cmd *cobra.Command, args []string) {
 			addr, _ := cmd.Flags().GetString("addr")
 			log.Printf("Starting API server on %s", addr)
-			if err := RunAPI(addr); err != nil {
+			if err := RunAPI(addr, svc); err != nil {
 				log.Fatalf("Failed to start API server: %v", err)
 			}
 		},
