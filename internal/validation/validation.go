@@ -34,7 +34,7 @@ func Validate[T any](input T) Errors {
 
 	if err := v.Struct(input); err != nil {
 		for _, fieldErr := range err.(validator.ValidationErrors) {
-			output.Add(fieldErr.Field(), fieldErr.Error())
+			output.Add(fieldErr.StructField(), fieldErr.Error())
 		}
 	}
 
