@@ -5,7 +5,7 @@ import (
 	"strings"
 	"time"
 
-	"golang/tutorial/todo/internal/handlers"
+	"golang/tutorial/todo/internal/api/handlers"
 	"golang/tutorial/todo/internal/models"
 	"golang/tutorial/todo/internal/utils"
 	"golang/tutorial/todo/internal/validation"

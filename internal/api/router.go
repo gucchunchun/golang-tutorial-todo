@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"golang/tutorial/todo/internal/handlers/task"
+	"golang/tutorial/todo/internal/api/handlers/task"
 )
 
 type Handler interface {

@@ -3,7 +3,7 @@ package task
 import (
 	"net/http"
 
-	"golang/tutorial/todo/internal/handlers"
+	"golang/tutorial/todo/internal/api/handlers"
 )
 
 func (h *TaskHandler) List(w http.ResponseWriter, r *http.Request) {
