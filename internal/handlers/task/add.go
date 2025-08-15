@@ -14,7 +14,7 @@ func (h *TaskHandler) Add(w http.ResponseWriter, r *http.Request) {
 		DueDate *string `json:"due_date"`
 	}
 	if err := handlers.ReadJSON(r, &input); err != nil {
-		handlers.WriteJSONError(w, http.StatusBadRequest, "Invalid request body")
+		handlers.WriteRequestError(w)
 		return
 	}
 

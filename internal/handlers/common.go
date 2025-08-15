@@ -33,3 +33,7 @@ func WriteValidationError(w http.ResponseWriter, vErr validation.Errors) {
 	w.WriteHeader(http.StatusBadRequest)
 	_ = json.NewEncoder(w).Encode(vErr)
 }
+
+func WriteRequestError(w http.ResponseWriter) {
+	WriteJSONError(w, http.StatusBadRequest, "Invalid request body")
+}
