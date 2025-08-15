@@ -27,6 +27,8 @@ func (s *Router) Routes() http.Handler {
 
 	// 個別にミドルウェア設定（この場合二度ログ出力される）
 	mux.Handle("GET /", logger.Log(http.HandlerFunc((s.handleHelloworld))))
+	mux.HandleFunc("GET /health", (s.handleHealth))
+
 	// ルーティングの設定
 	for _, h := range s.handlers {
 		h.Routes(mux)
@@ -39,4 +41,8 @@ func (s *Router) handleHelloworld(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(map[string]string{"message": "Hello, World!"})
+}
+
+func (s *Router) handleHealth(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusOK)
 }
