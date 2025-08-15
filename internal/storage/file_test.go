@@ -16,7 +16,7 @@ func TestStorage_LoadEmptyTasks(t *testing.T) {
 	}
 	defer os.Remove(file.Name())
 
-	storage := storage.New(file.Name())
+	storage := storage.NewStorage(file.Name())
 
 	tasks, err := storage.LoadTasks()
 	if err != nil {
@@ -35,7 +35,7 @@ func TestStorage_StoreTask(t *testing.T) {
 	}
 	defer os.Remove(file.Name())
 
-	storage := storage.New(file.Name())
+	storage := storage.NewStorage(file.Name())
 
 	task1, err := models.NewTask("Buy milk", nil, time.Now())
 	if err != nil {
