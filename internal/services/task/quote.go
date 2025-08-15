@@ -2,11 +2,10 @@ package task
 
 import (
 	"context"
-	"golang/tutorial/todo/internal/quotes"
 )
 
-func GetQuote(c quotes.Client) (string, error) {
-	quote, err := c.RandomQuote(context.Background())
+func (c *Service) GetQuote(ctx context.Context) (string, error) {
+	quote, err := c.quoteClient.RandomQuote(ctx)
 	if err != nil {
 		return "", err
 	}

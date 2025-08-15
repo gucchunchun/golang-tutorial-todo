@@ -7,15 +7,6 @@ import (
 	"time"
 )
 
-type Quote struct {
-	Text   string `json:"q"`
-	Author string `json:"a,omitempty"`
-}
-
-type Client interface {
-	RandomQuote(ctx context.Context) (Quote, error)
-}
-
 type HTTPClient struct {
 	BaseURL   string
 	HTTP      *http.Client
@@ -32,10 +23,6 @@ func NewHTTPClient(baseURL string, timeout time.Duration) *HTTPClient {
 		UserAgent: "todo-cli/1.0",
 		Timeout:   timeout,
 	}
-}
-
-type ResponseError struct {
-	StatusCode int
 }
 
 func (e *ResponseError) Error() string {
