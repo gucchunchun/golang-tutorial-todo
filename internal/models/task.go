@@ -73,7 +73,7 @@ type Task struct {
 	Name      string     `json:"name"`
 	Status    Status     `json:"status"`
 	CreatedAt time.Time  `json:"created_at"`
-	DueDate   *time.Time `json:"due_date,omitempty"`
+	DueDate   *time.Time `json:"due_date"`
 }
 
 func NewTask(name string, due *time.Time, now time.Time) (Task, error) {
@@ -89,18 +89,40 @@ func NewTask(name string, due *time.Time, now time.Time) (Task, error) {
 		ID:        NewTaskID(),
 		Name:      name,
 		Status:    Pending,
-		CreatedAt: now.UTC(),
+		CreatedAt: now,
 		DueDate:   due,
 	}, nil
 }
 
 type TaskOutput struct {
-	ID        string
-	Name      string
-	Status    string
-	CreatedAt string
-	DueDate   string
-	TimeLeft  string
+	ID        TaskID         `json:"id"`
+	Name      string         `json:"name"`
+	Status    Status         `json:"status"`
+	CreatedAt time.Time      `json:"created_at"`
+	DueDate   *time.Time     `json:"due_date"`
+	TimeLeft  *time.Duration `json:"time_left"`
+}
+
+func (t *Task) TaskOutput() TaskOutput {
+	var timeLeft *time.Duration = nil
+	if t.DueDate != nil && !t.DueDate.IsZero() {
+		localTime := time.Now()
+		if t.DueDate.Before(localTime) {
+			zero := time.Duration(0)
+			timeLeft = &zero
+		} else {
+			d := t.DueDate.Sub(localTime)
+			timeLeft = &d
+		}
+	}
+	return TaskOutput{
+		ID:        t.ID,
+		Name:      t.Name,
+		Status:    t.Status,
+		CreatedAt: t.CreatedAt,
+		DueDate:   t.DueDate,
+		TimeLeft:  timeLeft,
+	}
 }
 
 type TaskUpdate struct {

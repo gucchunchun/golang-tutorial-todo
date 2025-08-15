@@ -3,8 +3,6 @@ package utils
 import (
 	"fmt"
 	"time"
-
-	"golang/tutorial/todo/internal/models"
 )
 
 const (
@@ -12,45 +10,29 @@ const (
 	DatetimeFormatOutput = DateFormatOutput + " 15:04:05"
 )
 
-func FormatTaskOutput(id models.TaskID, name, status string, createdAt, dueDate time.Time) string {
-	createdAtOutput, _ := formatDatetime(createdAt)
-	dueDateOutput, _ := formatDate(dueDate)
-	timeLeft, _ := formatTimeLeft(dueDate)
-
-	// 左揃え＋固定幅でフォーマット
-	return fmt.Sprintf("%-16s | %-20s | %-8s | %-19s | %-11s | %-15s",
-		id.String(), name, status, createdAtOutput, dueDateOutput, timeLeft)
-}
-
-func formatDate(date time.Time) (string, error) {
+func FormatDate(date time.Time) (string, error) {
 	if date.IsZero() {
-		return "No due date", nil
+		return "", nil
 	}
 	return date.In(time.Local).Format(DateFormatOutput), nil
 }
 
-func formatDatetime(datetime time.Time) (string, error) {
+func FormatDatetime(datetime time.Time) (string, error) {
 	if datetime.IsZero() {
-		return "No date", nil
+		return "", nil
 	}
 	return datetime.In(time.Local).Format(DatetimeFormatOutput), nil
 }
 
-func formatTimeLeft(dueDate time.Time) (string, error) {
-	if dueDate.IsZero() {
-		return "No due date", nil
+func FormatDurationToDays(duration time.Duration) string {
+	if duration == 0 {
+		return ""
 	}
 
-	now := time.Now()
-	if dueDate.Before(now) {
-		return "Overdue", nil
-	}
-
-	timeLeft := dueDate.Sub(now)
-	days := int(timeLeft.Hours() / 24)
-	if int(timeLeft.Hours())%24 != 0 {
+	days := int(duration.Hours() / 24)
+	if int(duration.Hours())%24 != 0 {
 		days++
 	}
 
-	return fmt.Sprintf("%d days", days), nil
+	return fmt.Sprintf("%d days", days)
 }

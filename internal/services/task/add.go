@@ -28,7 +28,7 @@ func (s *Service) AddTask(taskName string, dueDate string) error {
 		dueDateTime = parsedDueDate
 	}
 
-	newTask, err := models.NewTask(taskName, &dueDateTime, utils.Now())
+	newTask, err := models.NewTask(taskName, &dueDateTime, utils.SystemTime())
 	if err != nil {
 		return fmt.Errorf("failed to create new task: %v", err)
 	}

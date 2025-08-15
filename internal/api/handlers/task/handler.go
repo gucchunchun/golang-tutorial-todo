@@ -9,7 +9,7 @@ import (
 
 type TaskService interface {
 	AddTask(taskName string, dueDate string) error
-	ListTasks() ([]models.Task, error)
+	ListTasks() ([]models.TaskOutput, error)
 	UpdateTask(taskID models.TaskID, updates models.TaskUpdate) error
 }
 
