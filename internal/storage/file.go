@@ -7,11 +7,6 @@ import (
 	"golang/tutorial/todo/internal/models"
 )
 
-type Client interface {
-	LoadTasks() ([]models.Task, error)
-	SaveTasks(tasks []models.Task) error
-}
-
 type Storage struct {
 	fileName string
 }

@@ -2,20 +2,24 @@ package task
 
 import (
 	"context"
+	"golang/tutorial/todo/internal/models"
 	"golang/tutorial/todo/internal/quotes"
-	"golang/tutorial/todo/internal/storage"
 )
 
 type QuoteClient interface {
 	RandomQuote(ctx context.Context) (quotes.Quote, error)
 }
+type StorageClient interface {
+	LoadTasks() ([]models.Task, error)
+	SaveTasks(tasks []models.Task) error
+}
 
 type Service struct {
 	quoteClient QuoteClient
-	storage     storage.Client
+	storage     StorageClient
 }
 
-func NewService(quoteClient QuoteClient, storage storage.Client) *Service {
+func NewService(quoteClient QuoteClient, storage StorageClient) *Service {
 	return &Service{
 		quoteClient: quoteClient,
 		storage:     storage,
