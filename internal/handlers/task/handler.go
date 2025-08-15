@@ -2,16 +2,15 @@ package task
 
 import (
 	"net/http"
+	"strings"
 
 	"golang/tutorial/todo/internal/models"
 )
 
 type TaskService interface {
 	AddTask(taskName string, dueDate string) error
-	// Get(id string) (models.Task, error)
 	ListTasks() ([]models.Task, error)
-	// Update(id string, title string) error
-	// Delete(id string) error
+	UpdateTask(taskID models.TaskID, updates models.TaskUpdate) error
 }
 
 type TaskHandler struct {
@@ -27,6 +26,10 @@ func NewTaskHandler(taskService TaskService) *TaskHandler {
 func (h *TaskHandler) Routes(mux *http.ServeMux) {
 	mux.HandleFunc("POST /tasks", h.Add)
 	mux.HandleFunc("GET /tasks", h.List)
-	// mux.HandleFunc("PATCH /tasks/", h.Update)
-	// mux.HandleFunc("DELETE /tasks/", h.Delete)
+	mux.HandleFunc("PATCH /tasks/", h.Update)
+}
+
+func tailID(raw string) (models.TaskID, bool) {
+	id, err := models.ParseTaskID(strings.TrimSpace(raw))
+	return id, err == nil
 }
