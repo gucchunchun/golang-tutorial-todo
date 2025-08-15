@@ -16,21 +16,15 @@ func newAddCmd(svc task.Service) *cobra.Command {
 		Use:   "add",
 		Short: "Add new task",
 		Long:  "You can add a new task to your todo list with this command.",
-		Args:  cobra.MaximumNArgs(2),
+		Args:  cobra.RangeArgs(1, 2),
 		Run: func(cmd *cobra.Command, args []string) {
-			var err error
-			switch len(args) {
-			case 0:
-				fmt.Println("Error: Task name is required")
-				return
-			case 1:
-				err = svc.AddTask(args[0], setDueDate, "")
-			case 2:
-				err = svc.AddTask(args[0], setDueDate, args[1])
-			default:
-				fmt.Println("too many arguments")
-				return
+			var dueDate string
+			if len(args) == 1 {
+				dueDate = ""
+			} else {
+				dueDate = args[1]
 			}
+			err := svc.AddTask(args[0], dueDate)
 			if err != nil {
 				fmt.Printf("Error: %v\n", err)
 				return

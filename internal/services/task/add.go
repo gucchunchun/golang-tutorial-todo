@@ -9,7 +9,7 @@ import (
 	"golang/tutorial/todo/internal/utils"
 )
 
-func (s *Service) AddTask(taskName string, setDueDate bool, dueDate string) error {
+func (s *Service) AddTask(taskName string, dueDate string) error {
 	if !utils.IsValidTaskName(taskName) {
 		return fmt.Errorf("invalid task name")
 	}
@@ -20,7 +20,7 @@ func (s *Service) AddTask(taskName string, setDueDate bool, dueDate string) erro
 	}
 
 	var dueDateTime time.Time
-	if setDueDate {
+	if dueDate != "" {
 		parsedDueDate, err := utils.ParseDate(dueDate)
 		if err != nil {
 			return fmt.Errorf("failed to parse due date: %v", err)
