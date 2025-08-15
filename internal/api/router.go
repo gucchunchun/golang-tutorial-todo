@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"golang/tutorial/todo/internal/api/handlers/task"
+	"golang/tutorial/todo/internal/api/middleware/logger"
 )
 
 type Handler interface {
@@ -23,12 +24,15 @@ func New(taskService task.TaskService) *Router {
 
 func (s *Router) Routes() http.Handler {
 	mux := http.NewServeMux()
-	mux.HandleFunc("GET /", s.handleHelloworld)
+
+	// 個別にミドルウェア設定（この場合二度ログ出力される）
+	mux.Handle("GET /", logger.Log(http.HandlerFunc((s.handleHelloworld))))
 	// ルーティングの設定
 	for _, h := range s.handlers {
 		h.Routes(mux)
 	}
-	return mux
+	// 全てのルートにミドルウェアの設定
+	return logger.Log(mux)
 }
 
 func (s *Router) handleHelloworld(w http.ResponseWriter, r *http.Request) {
