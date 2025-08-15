@@ -28,6 +28,7 @@ var rootCmd = &cobra.Command{
 func setupCommands(taskService task.Service) {
 	rootCmd.AddCommand(newAddCmd(taskService))
 	rootCmd.AddCommand(newListCmd(taskService))
+	rootCmd.AddCommand(newUpdateCmd(taskService))
 	rootCmd.AddCommand(newAPICmd(taskService))
 }
 
