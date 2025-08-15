@@ -1,21 +1,42 @@
 package cmd
 
 import (
+	"context"
 	"log"
 	"net/http"
+	"time"
 
 	"github.com/spf13/cobra"
 
-	"golang/tutorial/todo/internal/httpapi"
+	"golang/tutorial/todo/internal/api"
+	"golang/tutorial/todo/internal/services/task"
 )
 
-func RunAPI(addr string, svc TaskService) error {
-	srv := httpapi.New(svc)
+func runAPI(ctx context.Context, addr string, svc task.Service) error {
+	api := api.New(&svc)
+	handler := api.Routes()
+
+	server := &http.Server{
+		Addr:    addr,
+		Handler: handler,
+	}
+
 	log.Printf("listening on %s", addr)
-	return http.ListenAndServe(addr, srv.Routes())
+	go func() {
+		// Ctrl-C / cancel()が呼ばれた時にサーバーをシャットダウンする
+		<-ctx.Done()
+		// NOTE: 5秒のタイムアウト(既存接続の完了のため）を設定してシャットダウン
+		//       もし5秒以内にdeferが呼ばれなかった場合、強制的にserver.Shutdownが終了される
+		shutdownCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel()
+		if err := server.Shutdown(shutdownCtx); err != nil {
+			log.Printf("server shutdown error: %v", err)
+		}
+	}()
+	return http.ListenAndServe(addr, handler)
 }
 
-func newApiCmd(svc TaskService) *cobra.Command {
+func newAPICmd(svc task.Service) *cobra.Command {
 	var apiCmd = &cobra.Command{
 		Use:   "api",
 		Short: "Run the HTTP API server",
@@ -23,7 +44,7 @@ func newApiCmd(svc TaskService) *cobra.Command {
 		Run: func(cmd *cobra.Command, args []string) {
 			addr, _ := cmd.Flags().GetString("addr")
 			log.Printf("Starting API server on %s", addr)
-			if err := RunAPI(addr, svc); err != nil {
+			if err := runAPI(cmd.Context(), addr, svc); err != nil {
 				log.Fatalf("Failed to start API server: %v", err)
 			}
 		},

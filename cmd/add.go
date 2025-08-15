@@ -4,12 +4,14 @@ import (
 	"fmt"
 
 	"github.com/spf13/cobra"
+
+	"golang/tutorial/todo/internal/services/task"
 )
 
 var setDueDate bool
 var sayQuote bool
 
-func newAddCmd(svc TaskService) *cobra.Command {
+func newAddCmd(svc task.Service) *cobra.Command {
 	var addCmd = &cobra.Command{
 		Use:   "add",
 		Short: "Add new task",

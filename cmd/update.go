@@ -6,10 +6,11 @@ import (
 	"github.com/spf13/cobra"
 
 	"golang/tutorial/todo/internal/models"
+	"golang/tutorial/todo/internal/services/task"
 	"golang/tutorial/todo/internal/utils"
 )
 
-func newUpdateCmd(svc TaskService) *cobra.Command {
+func newUpdateCmd(svc task.Service) *cobra.Command {
 	var updateCmd = &cobra.Command{
 		Use:   "update",
 		Short: "Update an existing task",

@@ -11,7 +11,7 @@ type Storage struct {
 	fileName string
 }
 
-func New(fileName string) *Storage {
+func NewStorage(fileName string) *Storage {
 	return &Storage{
 		fileName: fileName,
 	}

@@ -3,18 +3,14 @@ package cmd
 import (
 	"fmt"
 	"os"
+	"time"
 
 	"github.com/spf13/cobra"
 
-	"golang/tutorial/todo/internal/models"
+	"golang/tutorial/todo/internal/quotes"
+	"golang/tutorial/todo/internal/services/task"
+	"golang/tutorial/todo/internal/storage"
 )
-
-type TaskService interface {
-	AddTask(title string, setDueDate bool, dueDate string) error
-	GetRandomQuote() (string, error)
-	ListTasks() ([]models.Task, error)
-	UpdateTask(id models.TaskID, updates models.TaskUpdate) error
-}
 
 var rootCmd = &cobra.Command{
 	// Use: holds the text used to invoke usage of the command.
@@ -29,15 +25,20 @@ var rootCmd = &cobra.Command{
 	},
 }
 
-func setupCommands(taskService TaskService) {
+func setupCommands(taskService task.Service) {
 	rootCmd.AddCommand(newAddCmd(taskService))
 	rootCmd.AddCommand(newListCmd(taskService))
-	rootCmd.AddCommand(newUpdateCmd(taskService))
-	rootCmd.AddCommand(newApiCmd(taskService))
+	rootCmd.AddCommand(newAPICmd(taskService))
 }
 
-func Execute(taskService TaskService) {
-	setupCommands(taskService)
+func Execute() {
+	// サービスの初期化
+	quoteClient := quotes.NewHTTPClient(os.Getenv("QUOTES_BASE_URL"), 10*time.Second)
+	storageClient := storage.NewStorage(os.Getenv("STORAGE_FILE_PATH"))
+	taskService := task.NewService(quoteClient, storageClient)
+
+	setupCommands(*taskService)
+
 	if err := rootCmd.Execute(); err != nil {
 		fmt.Println(err)
 		os.Exit(1)
