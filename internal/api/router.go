@@ -6,7 +6,10 @@ import (
 
 	"golang/tutorial/todo/internal/api/handlers/task"
 	"golang/tutorial/todo/internal/api/middleware/logmw"
+	"golang/tutorial/todo/internal/api/middleware/recovermw"
 )
+
+type Middleware = func(next http.Handler) http.Handler
 
 type Handler interface {
 	Routes(mux *http.ServeMux)
@@ -28,13 +31,22 @@ func (s *Router) Routes() http.Handler {
 	// 個別にミドルウェア設定（この場合二度ログ出力される）
 	mux.Handle("GET /", logmw.Log(http.HandlerFunc((s.handleHelloworld))))
 	mux.HandleFunc("GET /health", (s.handleHealth))
+	mux.HandleFunc("GET /panic", (s.handlePanic))
 
 	// ルーティングの設定
 	for _, h := range s.handlers {
 		h.Routes(mux)
 	}
 	// 全てのルートにミドルウェアの設定
-	return logmw.Log(mux)
+	middlewares := []Middleware{
+		recovermw.Recover,
+		logmw.Log,
+	}
+	var handler http.Handler = mux
+	for _, m := range middlewares {
+		handler = m(handler)
+	}
+	return handler
 }
 
 func (s *Router) handleHelloworld(w http.ResponseWriter, r *http.Request) {
@@ -45,4 +57,8 @@ func (s *Router) handleHelloworld(w http.ResponseWriter, r *http.Request) {
 
 func (s *Router) handleHealth(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
+}
+
+func (s *Router) handlePanic(w http.ResponseWriter, r *http.Request) {
+	panic("panic")
 }
