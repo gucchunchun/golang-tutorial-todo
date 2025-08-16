@@ -9,10 +9,8 @@ import (
 func (h *TaskHandler) GetList(w http.ResponseWriter, r *http.Request) {
 	tasks, err := h.TaskService.ListTasks()
 	if err != nil {
-		handlers.WriteJSONError(w, http.StatusInternalServerError, err.Error())
-	}
-	if len(tasks) == 0 {
-		handlers.WriteJSONError(w, http.StatusNotFound, "No tasks found")
+		handlers.WriteError(w, err)
+		return
 	}
 
 	handlers.WriteJSON(w, http.StatusOK, tasks)

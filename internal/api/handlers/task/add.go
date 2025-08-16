@@ -4,7 +4,6 @@ import (
 	"net/http"
 
 	"golang/tutorial/todo/internal/api/handlers"
-	"golang/tutorial/todo/internal/validation"
 )
 
 func (h *TaskHandler) Add(w http.ResponseWriter, r *http.Request) {
@@ -14,16 +13,7 @@ func (h *TaskHandler) Add(w http.ResponseWriter, r *http.Request) {
 		DueDate *string `json:"due_date"`
 	}
 	if err := handlers.ReadJSON(r, &input); err != nil {
-		handlers.WriteRequestError(w)
-		return
-	}
-
-	// バリデーション
-	if vErr := validation.ValidateCreateTaskInput(validation.CreateTaskInput{
-		Name:    input.Name,
-		DueDate: input.DueDate,
-	}); vErr != nil {
-		handlers.WriteValidationError(w, vErr)
+		handlers.WriteError(w, err)
 		return
 	}
 
@@ -35,7 +25,7 @@ func (h *TaskHandler) Add(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := h.TaskService.AddTask(input.Name, dueDate); err != nil {
-		handlers.WriteJSONError(w, http.StatusInternalServerError, err.Error())
+		handlers.WriteError(w, err)
 		return
 	}
 

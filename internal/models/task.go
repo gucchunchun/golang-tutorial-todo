@@ -126,8 +126,8 @@ func (t *Task) TaskOutput() TaskOutput {
 }
 
 type TaskUpdate struct {
-	Status *Status
-	Due    *time.Time
+	Status *string
+	Due    *string
 	Name   *string
 }
 

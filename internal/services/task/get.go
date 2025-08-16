@@ -6,7 +6,7 @@ import (
 	"golang/tutorial/todo/internal/models"
 )
 
-func (s *Service) GetTask(taskID models.TaskID) (models.TaskOutput, error) {
+func (s *TaskService) GetTask(taskID models.TaskID) (models.TaskOutput, error) {
 	tasks, err := s.storage.LoadTasks()
 	if err != nil {
 		return models.TaskOutput{}, err

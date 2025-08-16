@@ -8,6 +8,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"golang/tutorial/todo/internal/quotes"
+	"golang/tutorial/todo/internal/services/quotesvc"
 	"golang/tutorial/todo/internal/services/task"
 	"golang/tutorial/todo/internal/storage"
 )
@@ -25,20 +26,21 @@ var rootCmd = &cobra.Command{
 	},
 }
 
-func setupCommands(taskService task.Service) {
-	rootCmd.AddCommand(newAddCmd(taskService))
+func setupCommands(quoteSvc quotesvc.QuoteService, taskService task.TaskService) {
+	rootCmd.AddCommand(newAddCmd(quoteSvc, taskService))
 	rootCmd.AddCommand(newListCmd(taskService))
 	rootCmd.AddCommand(newUpdateCmd(taskService))
-	rootCmd.AddCommand(newAPICmd(taskService))
+	rootCmd.AddCommand(newAPICmd(quoteSvc, taskService))
 }
 
 func Execute() {
 	// サービスの初期化
 	quoteClient := quotes.NewHTTPClient(os.Getenv("QUOTES_BASE_URL"), 10*time.Second)
+	quoteSvc := quotesvc.NewQuoteService(quoteClient)
 	storageClient := storage.NewStorage(os.Getenv("STORAGE_FILE_PATH"))
-	taskService := task.NewService(quoteClient, storageClient)
+	taskService := task.NewTaskService(storageClient)
 
-	setupCommands(*taskService)
+	setupCommands(*quoteSvc, *taskService)
 
 	if err := rootCmd.Execute(); err != nil {
 		fmt.Println(err)

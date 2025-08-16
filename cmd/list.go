@@ -10,7 +10,7 @@ import (
 	"golang/tutorial/todo/internal/utils"
 )
 
-func newListCmd(svc task.Service) *cobra.Command {
+func newListCmd(svc task.TaskService) *cobra.Command {
 	var listCmd = &cobra.Command{
 		Use:   "list",
 		Short: "List all tasks",

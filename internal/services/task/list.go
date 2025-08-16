@@ -1,13 +1,14 @@
 package task
 
 import (
+	"golang/tutorial/todo/internal/apperr"
 	"golang/tutorial/todo/internal/models"
 )
 
-func (s *Service) ListTasks() ([]models.TaskOutput, error) {
+func (s *TaskService) ListTasks() ([]models.TaskOutput, error) {
 	tasks, err := s.storage.LoadTasks()
 	if err != nil {
-		return nil, err
+		return nil, apperr.E(apperr.CodeUnknown, "Failed to load tasks", ErrDatabase)
 	}
 
 	output := make([]models.TaskOutput, 0, len(tasks))

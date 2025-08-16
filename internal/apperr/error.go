@@ -1,15 +1,40 @@
 package apperr
 
+import "net/http"
+
 type Code int
 
 const (
 	CodeUnknown Code = iota
 	CodeNotFound
 	CodeInvalid
-	CodeConflict
-	CodeUnauthorized
-	CodeForbidden
 )
+
+func (c Code) String() string {
+	switch c {
+	case CodeNotFound:
+		return "NOT_FOUND"
+	case CodeInvalid:
+		return "INVALID"
+	default:
+		return "UNKNOWN"
+	}
+}
+
+func (c Code) MarshalText() ([]byte, error) {
+	return []byte(c.String()), nil
+}
+
+func (c Code) HTTPStatus() int {
+	switch c {
+	case CodeNotFound:
+		return http.StatusNotFound
+	case CodeInvalid:
+		return http.StatusBadRequest
+	default:
+		return http.StatusInternalServerError
+	}
+}
 
 type Error struct {
 	Code    Code

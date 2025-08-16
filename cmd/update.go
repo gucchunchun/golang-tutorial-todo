@@ -7,10 +7,9 @@ import (
 
 	"golang/tutorial/todo/internal/models"
 	"golang/tutorial/todo/internal/services/task"
-	"golang/tutorial/todo/internal/utils"
 )
 
-func newUpdateCmd(svc task.Service) *cobra.Command {
+func newUpdateCmd(svc task.TaskService) *cobra.Command {
 	var updateCmd = &cobra.Command{
 		Use:   "update",
 		Short: "Update an existing task",
@@ -25,20 +24,10 @@ func newUpdateCmd(svc task.Service) *cobra.Command {
 
 			updates := models.TaskUpdate{}
 			if status, _ := cmd.Flags().GetString("status"); status != "" {
-				newStatus, err := models.ParseStatus(status)
-				if err != nil {
-					fmt.Printf("Error parsing status: %v\n", err)
-					return
-				}
-				updates.Status = &newStatus
+				updates.Status = &status
 			}
 			if due, _ := cmd.Flags().GetString("due"); due != "" {
-				newDue, err := utils.ParseDate(due)
-				if err != nil {
-					fmt.Printf("Error parsing due date: %v\n", err)
-					return
-				}
-				updates.Due = &newDue
+				updates.Due = &due
 			}
 			if name, _ := cmd.Flags().GetString("name"); name != "" {
 				updates.Name = &name

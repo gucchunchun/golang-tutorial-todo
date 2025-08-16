@@ -9,10 +9,11 @@ import (
 	"github.com/spf13/cobra"
 
 	"golang/tutorial/todo/internal/api"
+	"golang/tutorial/todo/internal/services/quotesvc"
 	"golang/tutorial/todo/internal/services/task"
 )
 
-func runAPI(ctx context.Context, addr string, svc task.Service) error {
+func runAPI(ctx context.Context, addr string, svc task.TaskService) error {
 	api := api.New(&svc)
 	handler := api.Routes()
 
@@ -36,7 +37,7 @@ func runAPI(ctx context.Context, addr string, svc task.Service) error {
 	return http.ListenAndServe(addr, handler)
 }
 
-func newAPICmd(svc task.Service) *cobra.Command {
+func newAPICmd(quoteSvc quotesvc.QuoteService, svc task.TaskService) *cobra.Command {
 	var apiCmd = &cobra.Command{
 		Use:   "api",
 		Short: "Run the HTTP API server",

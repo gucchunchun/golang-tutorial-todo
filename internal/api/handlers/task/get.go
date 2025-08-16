@@ -6,27 +6,19 @@ import (
 	"strings"
 
 	"golang/tutorial/todo/internal/api/handlers"
-	"golang/tutorial/todo/internal/apperr"
 )
 
 func (s *TaskHandler) get(w http.ResponseWriter, r *http.Request) {
+	// TODO: taskIDのバリデーションはserviceに移動
 	taskID, ok := tailID(strings.TrimPrefix(r.URL.Path, "/tasks/"))
 	if !ok {
-		handlers.WriteJSONError(w, http.StatusBadRequest, "Invalid task ID")
+		handlers.WriteError(w, errors.New("invalid taskID"))
 		return
 	}
 
 	task, err := s.TaskService.GetTask(taskID)
 	if err != nil {
-		var ae *apperr.Error
-		if errors.As(err, &ae) {
-			switch ae.Code {
-			case apperr.CodeNotFound:
-				handlers.WriteJSONError(w, http.StatusNotFound, ae.Error())
-				return
-			}
-		}
-		handlers.WriteJSONError(w, http.StatusInternalServerError, err.Error())
+		handlers.WriteError(w, err)
 		return
 	}
 

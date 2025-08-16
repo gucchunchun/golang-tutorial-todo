@@ -7,4 +7,5 @@ import (
 var (
 	ErrNotFound   = errors.New("task not found")
 	ErrValidation = errors.New("validation failed")
+	ErrDatabase   = errors.New("database error")
 )

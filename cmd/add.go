@@ -5,13 +5,14 @@ import (
 
 	"github.com/spf13/cobra"
 
+	"golang/tutorial/todo/internal/services/quotesvc"
 	"golang/tutorial/todo/internal/services/task"
 )
 
 var setDueDate bool
 var sayQuote bool
 
-func newAddCmd(svc task.Service) *cobra.Command {
+func newAddCmd(quoteSvc quotesvc.QuoteService, svc task.TaskService) *cobra.Command {
 	var addCmd = &cobra.Command{
 		Use:   "add",
 		Short: "Add new task",
@@ -32,7 +33,7 @@ func newAddCmd(svc task.Service) *cobra.Command {
 			fmt.Println("task added successfully")
 
 			if sayQuote {
-				quote, err := svc.GetRandomQuote()
+				quote, err := quoteSvc.GetRandomQuote()
 				if err != nil {
 					fmt.Printf("Error fetching quote: %v\n", err)
 					return
