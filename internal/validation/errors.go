@@ -1,7 +1,9 @@
 // internal/validation/errors.go
 package validation
 
-import "strings"
+import (
+	"strings"
+)
 
 type FieldError struct {
 	Field   string `json:"field"`

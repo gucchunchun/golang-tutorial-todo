@@ -35,8 +35,6 @@ func Log(next http.Handler) http.Handler {
 
 		next.ServeHTTP(sw, r)
 
-		log.Println("logout")
-
 		log.Printf(
 			"%s %s %d %dB %s",
 			r.Method,

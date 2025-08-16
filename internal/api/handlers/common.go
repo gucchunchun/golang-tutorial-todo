@@ -3,7 +3,9 @@ package handlers
 import (
 	"encoding/json"
 	"errors"
+	"io"
 	"net/http"
+	"strings"
 
 	"golang/tutorial/todo/internal/apperr"
 )
@@ -35,7 +37,45 @@ func WriteError(w http.ResponseWriter, err error) {
 }
 
 func ReadJSON(r *http.Request, v any) error {
-	decoder := json.NewDecoder(r.Body)
+	// Content-Type
+	ct := r.Header.Get("Content-Type")
+	if ct != "" && !strings.HasPrefix(ct, "application/json") {
+		return apperr.E(apperr.CodeInvalid, "Content-Type must be application/json", nil)
+	}
+
 	defer r.Body.Close()
-	return decoder.Decode(v)
+
+	decoder := json.NewDecoder(r.Body)
+	decoder.DisallowUnknownFields()
+
+	if err := decoder.Decode(v); err != nil {
+		var syntaxErr *json.SyntaxError
+		var unmarshalTypeErr *json.UnmarshalTypeError
+
+		switch {
+		case errors.Is(err, io.EOF):
+			return apperr.E(apperr.CodeInvalid, "request body is empty", err)
+		case errors.As(err, &syntaxErr):
+			return apperr.E(apperr.CodeInvalid, "invalid JSON syntax", err)
+		case errors.As(err, &unmarshalTypeErr):
+			return apperr.E(apperr.CodeInvalid, "invalid field type", err)
+		default:
+			return apperr.E(apperr.CodeInvalid, "invalid JSON", err)
+		}
+	}
+
+	// 余りがないかチェック（配列など2個目のトークンがないか）
+	if decoder.More() {
+		return apperr.E(apperr.CodeInvalid, "multiple JSON values in body", nil)
+	}
+
+	return nil
+}
+
+func ParseID(r *http.Request, key string) (string, error) {
+	raw := r.PathValue(key)
+	if raw == "" {
+		return "", apperr.E(apperr.CodeInvalid, "missing ID in path", nil)
+	}
+	return raw, nil
 }

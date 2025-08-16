@@ -16,12 +16,6 @@ func newUpdateCmd(svc task.TaskService) *cobra.Command {
 		Long:  "You can update an existing task in your todo list with this command.",
 		Args:  cobra.MinimumNArgs(1),
 		Run: func(cmd *cobra.Command, args []string) {
-			taskID, err := models.ParseTaskID(args[0])
-			if err != nil {
-				fmt.Printf("Error parsing task ID: %v\n", err)
-				return
-			}
-
 			updates := models.TaskUpdate{}
 			if status, _ := cmd.Flags().GetString("status"); status != "" {
 				updates.Status = &status
@@ -32,7 +26,7 @@ func newUpdateCmd(svc task.TaskService) *cobra.Command {
 			if name, _ := cmd.Flags().GetString("name"); name != "" {
 				updates.Name = &name
 			}
-			err = svc.UpdateTask(taskID, updates)
+			err := svc.UpdateTask(args[0], updates)
 			if err != nil {
 				fmt.Printf("Error: %v\n", err)
 				return

@@ -10,14 +10,18 @@ import (
 	"golang/tutorial/todo/internal/validation"
 )
 
-func (s *TaskService) UpdateTask(taskID models.TaskID, updates models.TaskUpdate) error {
+func (s *TaskService) UpdateTask(taskID string, updates models.TaskUpdate) error {
 	// バリデーション
+	parsedID, err := models.ParseTaskID(taskID)
+	if err != nil {
+		return apperr.E(apperr.CodeInvalid, "Validation error", err)
+	}
 	if err := validation.ValidateUpdateTaskInput(validation.UpdateTaskInput{
 		Name:    updates.Name,
 		DueDate: updates.Due,
 		Status:  updates.Status,
 	}); err != nil {
-		return apperr.E(apperr.CodeInvalid, "Validation error", ErrValidation)
+		return apperr.E(apperr.CodeInvalid, "Validation error", err)
 	}
 
 	var status *models.Status
@@ -44,12 +48,12 @@ func (s *TaskService) UpdateTask(taskID models.TaskID, updates models.TaskUpdate
 
 	tasks, err := s.storage.LoadTasks()
 	if err != nil {
-		return apperr.E(apperr.CodeInvalid, "Validation error", ErrValidation)
+		return apperr.E(apperr.CodeInvalid, "Validation error", err)
 	}
 
 	found := false
 	for i, task := range tasks {
-		if task.ID == taskID {
+		if task.ID == parsedID {
 			found = true
 			if updates.Status != nil {
 				tasks[i].Status = *status
@@ -65,7 +69,7 @@ func (s *TaskService) UpdateTask(taskID models.TaskID, updates models.TaskUpdate
 	}
 
 	if !found {
-		return apperr.E(apperr.CodeNotFound, fmt.Sprintf("Task not found with ID: %d,", taskID), ErrNotFound)
+		return apperr.E(apperr.CodeNotFound, fmt.Sprintf("Task not found with ID: %s,", taskID), ErrNotFound)
 	}
 
 	err = s.storage.SaveTasks(tasks)

@@ -1,18 +1,15 @@
 package task
 
 import (
-	"errors"
 	"net/http"
-	"strings"
 
 	"golang/tutorial/todo/internal/api/handlers"
 )
 
 func (s *TaskHandler) get(w http.ResponseWriter, r *http.Request) {
-	// TODO: taskIDのバリデーションはserviceに移動
-	taskID, ok := tailID(strings.TrimPrefix(r.URL.Path, "/tasks/"))
-	if !ok {
-		handlers.WriteError(w, errors.New("invalid taskID"))
+	taskID, err := handlers.ParseID(r, "id")
+	if err != nil {
+		handlers.WriteError(w, err)
 		return
 	}
 

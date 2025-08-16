@@ -1,6 +1,8 @@
 package apperr
 
-import "net/http"
+import (
+	"net/http"
+)
 
 type Code int
 

@@ -1,19 +1,16 @@
 package task
 
 import (
-	"errors"
 	"net/http"
-	"strings"
 
 	"golang/tutorial/todo/internal/api/handlers"
 	"golang/tutorial/todo/internal/models"
 )
 
 func (t *TaskHandler) Update(w http.ResponseWriter, r *http.Request) {
-	// TODO: taskIDのバリデーションはserviceに移動
-	taskID, ok := tailID(strings.TrimPrefix(r.URL.Path, "/tasks/"))
-	if !ok {
-		handlers.WriteError(w, errors.New("invalid taskID"))
+	taskID, err := handlers.ParseID(r, "id")
+	if err != nil {
+		handlers.WriteError(w, err)
 		return
 	}
 
@@ -24,8 +21,7 @@ func (t *TaskHandler) Update(w http.ResponseWriter, r *http.Request) {
 		Status  *string `json:"status"`
 	}
 	if err := handlers.ReadJSON(r, &input); err != nil {
-		// TODO: エラー返却方法を策定
-		handlers.WriteError(w, errors.New("invalid request body"))
+		handlers.WriteError(w, err)
 		return
 	}
 

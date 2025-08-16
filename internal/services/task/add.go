@@ -16,7 +16,7 @@ func (s *TaskService) AddTask(taskName string, dueDate string) error {
 		Name:    taskName,
 		DueDate: dueDate,
 	}); err != nil {
-		return apperr.E(apperr.CodeInvalid, "Validation error", ErrValidation)
+		return apperr.E(apperr.CodeInvalid, "Validation error", err)
 	}
 
 	var dueDateTime time.Time
@@ -24,7 +24,7 @@ func (s *TaskService) AddTask(taskName string, dueDate string) error {
 		parsedDueDate, err := utils.ParseDate(dueDate)
 		if err != nil {
 			// NOTE: この時点で日付フォーマットが間違っていることは想定外
-			return apperr.E(apperr.CodeUnknown, fmt.Sprintf("Failed to parse due date: %s", s), nil)
+			return apperr.E(apperr.CodeUnknown, fmt.Sprintf("Failed to parse due date: %s", s), err)
 		}
 		dueDateTime = parsedDueDate
 	}
@@ -36,7 +36,7 @@ func (s *TaskService) AddTask(taskName string, dueDate string) error {
 
 	tasks, err := s.storage.LoadTasks()
 	if err != nil {
-		return apperr.E(apperr.CodeUnknown, "Failed to load tasks", ErrDatabase)
+		return apperr.E(apperr.CodeUnknown, "Failed to load tasks", err)
 	}
 
 	newTask, err := models.NewTask(taskName, &dueDateTime, utils.SystemTime())
