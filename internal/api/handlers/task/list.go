@@ -6,7 +6,7 @@ import (
 	"golang/tutorial/todo/internal/api/handlers"
 )
 
-func (h *TaskHandler) List(w http.ResponseWriter, r *http.Request) {
+func (h *TaskHandler) GetList(w http.ResponseWriter, r *http.Request) {
 	tasks, err := h.TaskService.ListTasks()
 	if err != nil {
 		handlers.WriteJSONError(w, http.StatusInternalServerError, err.Error())

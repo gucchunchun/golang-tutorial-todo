@@ -17,7 +17,7 @@ func NewStorage(fileName string) *Storage {
 	}
 }
 
-func (s *Storage) LoadTasks() ([]models.Task, error) {
+func (s *Storage) LoadTasks() (models.Tasks, error) {
 	// ファイルの存在チェック
 	if _, err := os.Stat(s.fileName); os.IsNotExist(err) {
 		return []models.Task{}, nil

@@ -130,3 +130,14 @@ type TaskUpdate struct {
 	Due    *time.Time
 	Name   *string
 }
+
+type Tasks []Task
+
+func (t Tasks) FindByID(id TaskID) (Task, bool) {
+	for _, task := range t {
+		if task.ID == id {
+			return task, true
+		}
+	}
+	return Task{}, false
+}

@@ -10,7 +10,7 @@ type QuoteClient interface {
 	RandomQuote(ctx context.Context) (quotes.Quote, error)
 }
 type StorageClient interface {
-	LoadTasks() ([]models.Task, error)
+	LoadTasks() (models.Tasks, error)
 	SaveTasks(tasks []models.Task) error
 }
 

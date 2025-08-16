@@ -19,7 +19,7 @@ type Error struct {
 
 func (e *Error) Error() string {
 	if e.Err != nil {
-		return e.Message + ": " + e.Err.Error()
+		return e.Err.Error() + ": " + e.Message
 	}
 	return e.Message
 }
