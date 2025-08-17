@@ -3,6 +3,7 @@ package api
 import (
 	"encoding/json"
 	"net/http"
+	"time"
 
 	"golang/tutorial/todo/internal/api/handlers/taskhdl"
 	"golang/tutorial/todo/internal/api/middleware/logmw"
@@ -46,7 +47,8 @@ func (s *Router) Routes() http.Handler {
 	for _, m := range middlewares {
 		handler = m(handler)
 	}
-	return handler
+	// Reference: O'REILLY「実用GO言語」10.5.5 p.248
+	return http.TimeoutHandler(handler, 20*time.Second, "timeout")
 }
 
 func (s *Router) handleHelloworld(w http.ResponseWriter, r *http.Request) {
