@@ -9,7 +9,7 @@ import (
 func (s *TaskService) GetTask(taskID string) (models.TaskOutput, error) {
 	parsedID, err := models.ParseTaskID(taskID)
 	if err != nil {
-		return models.TaskOutput{}, apperr.E(apperr.CodeInvalid, "Validation error", ErrValidation)
+		return models.TaskOutput{}, apperr.E(apperr.CodeInvalid, "Validation error", err)
 	}
 	tasks, err := s.storage.LoadTasks()
 	if err != nil {
@@ -18,7 +18,7 @@ func (s *TaskService) GetTask(taskID string) (models.TaskOutput, error) {
 
 	target, ok := tasks.FindByID(parsedID)
 	if !ok {
-		return models.TaskOutput{}, apperr.E(apperr.CodeNotFound, fmt.Sprintf("Task with the ID: %s not found", taskID), ErrNotFound)
+		return models.TaskOutput{}, apperr.E(apperr.CodeNotFound, fmt.Sprintf("Task with the ID: %s not found", taskID), err)
 	}
 	return target.TaskOutput(), nil
 }

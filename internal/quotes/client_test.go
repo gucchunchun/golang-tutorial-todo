@@ -26,10 +26,10 @@ func TestHTTPClient_RandomQuote_OK(t *testing.T) {
 			t.Fatalf("unexpected path: %s", r.URL.Path)
 		}
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(map[string]any{
-			"text":   testQuoteText,
-			"author": testQuoteAuthor,
-		})
+		json.NewEncoder(w).Encode([]quotes.Quote{{
+			Text:   testQuoteText,
+			Author: testQuoteAuthor,
+		}})
 	}))
 	defer ts.Close()
 

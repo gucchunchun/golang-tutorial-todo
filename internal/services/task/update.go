@@ -69,12 +69,12 @@ func (s *TaskService) UpdateTask(taskID string, updates models.TaskUpdate) error
 	}
 
 	if !found {
-		return apperr.E(apperr.CodeNotFound, fmt.Sprintf("Task not found with ID: %s,", taskID), ErrNotFound)
+		return apperr.E(apperr.CodeNotFound, fmt.Sprintf("Task not found with ID: %s,", taskID), err)
 	}
 
 	err = s.storage.SaveTasks(tasks)
 	if err != nil {
-		return apperr.E(apperr.CodeUnknown, "Failed to update task", ErrDatabase)
+		return apperr.E(apperr.CodeUnknown, "Failed to update task", err)
 	}
 	return nil
 }

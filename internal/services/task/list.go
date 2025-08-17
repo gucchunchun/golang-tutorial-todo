@@ -8,7 +8,7 @@ import (
 func (s *TaskService) ListTasks() ([]models.TaskOutput, error) {
 	tasks, err := s.storage.LoadTasks()
 	if err != nil {
-		return nil, apperr.E(apperr.CodeUnknown, "Failed to load tasks", ErrDatabase)
+		return nil, apperr.E(apperr.CodeUnknown, "Failed to load tasks", err)
 	}
 
 	output := make([]models.TaskOutput, 0, len(tasks))
