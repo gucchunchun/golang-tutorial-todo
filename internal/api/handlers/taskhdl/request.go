@@ -1,4 +1,4 @@
-package task
+package taskhdl
 
 type createRequest struct {
 	Name  string  `json:"name"`

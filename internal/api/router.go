@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"golang/tutorial/todo/internal/api/handlers/task"
+	"golang/tutorial/todo/internal/api/handlers/taskhdl"
 	"golang/tutorial/todo/internal/api/middleware/logmw"
 	"golang/tutorial/todo/internal/api/middleware/recovermw"
 )
@@ -19,9 +19,9 @@ type Router struct {
 	handlers []Handler
 }
 
-func New(taskService task.TaskService) *Router {
+func New(taskService taskhdl.TaskService) *Router {
 	return &Router{
-		handlers: []Handler{task.NewTaskHandler(taskService)},
+		handlers: []Handler{taskhdl.NewTaskHandler(taskService)},
 	}
 }
 
