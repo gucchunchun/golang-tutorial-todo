@@ -2,12 +2,14 @@ package task
 
 import (
 	"net/http"
+	"time"
 
+	"golang/tutorial/todo/internal/adapters/convert"
 	"golang/tutorial/todo/internal/api/handlers"
-	"golang/tutorial/todo/internal/models"
 )
 
 func (t *TaskHandler) Update(w http.ResponseWriter, r *http.Request) {
+	// IDの取得
 	taskID, err := handlers.ParseID(r, "id")
 	if err != nil {
 		handlers.WriteError(w, err)
@@ -15,24 +17,33 @@ func (t *TaskHandler) Update(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// リクエストボディの読み込み
-	var input struct {
-		Name    *string `json:"name"`
-		DueDate *string `json:"due_date"`
-		Status  *string `json:"status"`
-	}
-	if err := handlers.ReadJSON(r, &input); err != nil {
+	var in updateRequest
+	if err := handlers.ReadJSON(r, &in); err != nil {
+		// TODO: apperr
 		handlers.WriteError(w, err)
 		return
 	}
 
-	taskUpdate := models.TaskUpdate{
-		Status: input.Status,
-		Due:    input.DueDate,
-		Name:   input.Name,
+	// TODO: configで設定する
+	loc, _ := time.LoadLocation("Asia/Tokyo")
+
+	params := convert.UpdateParams{
+		Name:     in.Name,
+		DueAt:    in.DueAt,
+		Status:   in.Status,
+		ClearDue: in.ClearDue != nil && *in.ClearDue,
 	}
-	if err := t.TaskService.UpdateTask(taskID, taskUpdate); err != nil {
+	upd, err := convert.FromUpdateInput(params, loc)
+	if err != nil {
+		// TODO: apperr
 		handlers.WriteError(w, err)
 		return
 	}
-	handlers.WriteJSON(w, http.StatusOK, "Task updated successfully")
+
+	task, err := t.TaskService.UpdateTask(taskID, upd)
+	if err != nil {
+		handlers.WriteError(w, err)
+		return
+	}
+	handlers.WriteJSON(w, http.StatusOK, task)
 }

@@ -6,11 +6,11 @@ import (
 	"github.com/spf13/cobra"
 
 	"golang/tutorial/todo/internal/models"
-	"golang/tutorial/todo/internal/services/task"
+	"golang/tutorial/todo/internal/services/tasksvc"
 	"golang/tutorial/todo/internal/utils"
 )
 
-func newListCmd(svc task.TaskService) *cobra.Command {
+func newListCmd(svc tasksvc.TaskService) *cobra.Command {
 	var listCmd = &cobra.Command{
 		Use:   "list",
 		Short: "List all tasks",
@@ -47,15 +47,15 @@ func formatTask(task models.TaskOutput) string {
 	}
 
 	formatDueDate := "-"
-	if task.DueDate != nil && !task.DueDate.IsZero() {
-		formatDueDate, err = utils.FormatDate(*task.DueDate)
+	if task.DueAt != nil && !task.DueAt.IsZero() {
+		formatDueDate, err = utils.FormatDate(*task.DueAt)
 		if err != nil {
 			formatDueDate = "-"
 		}
 	}
 
 	timeLeft := "-"
-	if task.DueDate != nil && task.TimeLeft != nil {
+	if task.DueAt != nil && task.TimeLeft != nil {
 		timeLeft = utils.FormatDurationToDays(*task.TimeLeft)
 		if timeLeft == "" {
 			timeLeft = "Over due"

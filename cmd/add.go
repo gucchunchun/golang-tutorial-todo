@@ -2,30 +2,45 @@ package cmd
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/spf13/cobra"
 
+	"golang/tutorial/todo/internal/adapters/convert"
 	"golang/tutorial/todo/internal/services/quotesvc"
-	"golang/tutorial/todo/internal/services/task"
+	"golang/tutorial/todo/internal/services/tasksvc"
 )
 
 var setDueDate bool
 var sayQuote bool
 
-func newAddCmd(quoteSvc quotesvc.QuoteService, svc task.TaskService) *cobra.Command {
+func newAddCmd(quoteSvc quotesvc.QuoteService, svc tasksvc.TaskService) *cobra.Command {
 	var addCmd = &cobra.Command{
 		Use:   "add",
 		Short: "Add new task",
 		Long:  "You can add a new task to your todo list with this command.",
 		Args:  cobra.RangeArgs(1, 2),
 		Run: func(cmd *cobra.Command, args []string) {
-			var dueDate string
-			if len(args) == 1 {
-				dueDate = ""
-			} else {
+			// TODO: configで設定する
+			loc, _ := time.LoadLocation("Asia/Tokyo")
+
+			dueDate := ""
+			if len(args) != 1 {
 				dueDate = args[1]
 			}
-			err := svc.AddTask(args[0], dueDate)
+
+			params := convert.CreateParams{
+				Name:  args[0],
+				DueAt: &dueDate,
+			}
+
+			c, err := convert.FromCreateInput(params, loc)
+			if err != nil {
+				fmt.Printf("Error: %v\n", err)
+				return
+			}
+
+			_, err = svc.AddTask(c)
 			if err != nil {
 				fmt.Printf("Error: %v\n", err)
 				return

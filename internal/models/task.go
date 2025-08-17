@@ -3,29 +3,29 @@ package models
 import (
 	"encoding/json"
 	"fmt"
+	"strconv"
 	"strings"
 	"time"
-
-	"github.com/google/uuid"
 )
 
-type TaskID uuid.UUID
+// ID
+type TaskID uint64
 
-func NewTaskID() TaskID { u := uuid.New(); return TaskID(u) }
 func ParseTaskID(s string) (TaskID, error) {
-	u, err := uuid.Parse(s)
+	i, err := strconv.ParseUint(s, 10, 64)
 	if err != nil {
-		return TaskID{}, fmt.Errorf("invalid UUID: %w", err)
+		return TaskID(0), fmt.Errorf("invalid TaskID: %w", err)
 	}
-	return TaskID(u), nil
+	return TaskID(i), nil
 }
-func (id TaskID) String() string { return uuid.UUID(id).String() }
+func ParseTaskIDInt(i int) TaskID { return TaskID(i) }
+func (id TaskID) String() string  { return strconv.FormatUint(uint64(id), 10) }
 func (id *TaskID) UnmarshalText(b []byte) error {
-	u, err := uuid.ParseBytes(b)
+	i, err := strconv.ParseUint(string(b), 10, 64)
 	if err != nil {
 		return err
 	}
-	*id = TaskID(u)
+	*id = TaskID(i)
 	return nil
 }
 func (id TaskID) MarshalJSON() ([]byte, error) { return json.Marshal(id.String()) }
@@ -37,20 +37,21 @@ func (id *TaskID) UnmarshalJSON(b []byte) error {
 	return id.UnmarshalText([]byte(s))
 }
 
+// Status
 type Status int
 
 const (
-	Pending Status = iota
-	Ongoing
-	Done
+	StatusPending Status = iota
+	StatusOngoing
+	StatusDone
 )
 
-// NOTE: "[...]" はコンパイラに配列のサイズを推測させるために使用。
-// ここでは、Statusの値に対応する文字列（３）を定義しています。
+// NOTE: "[...]" はコンパイラに配列のサイズを推測させるために使用
+// ここでは、Statusの値に対応する文字列（３）を定義している
 var statusNames = [...]string{"Pending", "Ongoing", "Done"}
 
 func (s Status) String() string {
-	if s < Pending || s > Done {
+	if s < StatusPending || s > StatusDone {
 		return "Unknown"
 	}
 	return statusNames[s]
@@ -58,60 +59,51 @@ func (s Status) String() string {
 func ParseStatus(input string) (Status, error) {
 	switch strings.ToLower(input) {
 	case "pending":
-		return Pending, nil
+		return StatusPending, nil
 	case "ongoing":
-		return Ongoing, nil
+		return StatusOngoing, nil
 	case "done":
-		return Done, nil
+		return StatusDone, nil
 	default:
 		return -1, fmt.Errorf("invalid status: %s", input)
 	}
 }
 
-type Task struct {
-	ID        TaskID     `json:"id"`
-	Name      string     `json:"name"`
-	Status    Status     `json:"status"`
-	CreatedAt time.Time  `json:"created_at"`
-	DueDate   *time.Time `json:"due_date"`
-}
+// Date
+type Date = time.Time
 
-func NewTask(name string, due *time.Time, now time.Time) (Task, error) {
-	name = strings.TrimSpace(name)
-	if name == "" {
-		return Task{}, fmt.Errorf("name is required")
-	}
-	if due != nil {
-		d := due.UTC()
-		due = &d
-	}
-	return Task{
-		ID:        NewTaskID(),
-		Name:      name,
-		Status:    Pending,
-		CreatedAt: now,
-		DueDate:   due,
-	}, nil
+// TimeLeft
+type TimeLeft = time.Duration
+
+// Task
+type Task struct {
+	ID        TaskID `json:"id"`
+	Name      string `json:"name"`
+	Status    Status `json:"status"`
+	CreatedAt Date   `json:"created_at"`
+	UpdatedAt Date   `json:"updated_at"`
+	DueAt     *Date  `json:"due_date"`
 }
 
 type TaskOutput struct {
-	ID        TaskID         `json:"id"`
-	Name      string         `json:"name"`
-	Status    Status         `json:"status"`
-	CreatedAt time.Time      `json:"created_at"`
-	DueDate   *time.Time     `json:"due_date"`
-	TimeLeft  *time.Duration `json:"time_left"`
+	ID        TaskID    `json:"id"`
+	Name      string    `json:"name"`
+	Status    Status    `json:"status"`
+	CreatedAt Date      `json:"created_at"`
+	UpdatedAt Date      `json:"updated_at"`
+	DueAt     *Date     `json:"due_date"`
+	TimeLeft  *TimeLeft `json:"time_left"`
 }
 
 func (t *Task) TaskOutput() TaskOutput {
 	var timeLeft *time.Duration = nil
-	if t.DueDate != nil && !t.DueDate.IsZero() {
+	if t.DueAt != nil && !t.DueAt.IsZero() {
 		localTime := time.Now()
-		if t.DueDate.Before(localTime) {
+		if t.DueAt.Before(localTime) {
 			zero := time.Duration(0)
 			timeLeft = &zero
 		} else {
-			d := t.DueDate.Sub(localTime)
+			d := t.DueAt.Sub(localTime)
 			timeLeft = &d
 		}
 	}
@@ -120,15 +112,32 @@ func (t *Task) TaskOutput() TaskOutput {
 		Name:      t.Name,
 		Status:    t.Status,
 		CreatedAt: t.CreatedAt,
-		DueDate:   t.DueDate,
+		DueAt:     t.DueAt,
 		TimeLeft:  timeLeft,
 	}
 }
 
+type TaskCreate struct {
+	Name  string
+	DueAt *Date
+}
+
+func NewTask(id TaskID, name string, createdAt, updatedAt Date, dueAt *Date) Task {
+	return Task{
+		ID:        id,
+		Name:      name,
+		Status:    StatusPending,
+		CreatedAt: createdAt,
+		UpdatedAt: updatedAt,
+		DueAt:     dueAt,
+	}
+}
+
 type TaskUpdate struct {
-	Status *string
-	Due    *string
-	Name   *string
+	Name     *string
+	Status   *Status
+	DueAt    *Date
+	ClearDue bool
 }
 
 type Tasks []Task
@@ -140,4 +149,11 @@ func (t Tasks) FindByID(id TaskID) (Task, bool) {
 		}
 	}
 	return Task{}, false
+}
+func (t Tasks) TaskOutputs() []TaskOutput {
+	outputs := make([]TaskOutput, 0, len(t))
+	for _, task := range t {
+		outputs = append(outputs, task.TaskOutput())
+	}
+	return outputs
 }

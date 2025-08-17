@@ -10,10 +10,10 @@ import (
 
 	"golang/tutorial/todo/internal/api"
 	"golang/tutorial/todo/internal/services/quotesvc"
-	"golang/tutorial/todo/internal/services/task"
+	"golang/tutorial/todo/internal/services/tasksvc"
 )
 
-func runAPI(ctx context.Context, addr string, svc task.TaskService) error {
+func runAPI(ctx context.Context, addr string, svc tasksvc.TaskService) error {
 	api := api.New(&svc)
 	handler := api.Routes()
 
@@ -37,7 +37,7 @@ func runAPI(ctx context.Context, addr string, svc task.TaskService) error {
 	return http.ListenAndServe(addr, handler)
 }
 
-func newAPICmd(quoteSvc quotesvc.QuoteService, svc task.TaskService) *cobra.Command {
+func newAPICmd(quoteSvc quotesvc.QuoteService, svc tasksvc.TaskService) *cobra.Command {
 	var apiCmd = &cobra.Command{
 		Use:   "api",
 		Short: "Run the HTTP API server",

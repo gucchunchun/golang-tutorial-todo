@@ -7,10 +7,10 @@ import (
 )
 
 type TaskService interface {
-	AddTask(taskName string, dueDate string) error
+	AddTask(c models.TaskCreate) (models.Task, error)
 	GetTask(taskID string) (models.TaskOutput, error)
 	ListTasks() ([]models.TaskOutput, error)
-	UpdateTask(taskID string, updates models.TaskUpdate) error
+	UpdateTask(taskID string, updates models.TaskUpdate) (models.Task, error)
 }
 
 type TaskHandler struct {

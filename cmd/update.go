@@ -2,31 +2,40 @@ package cmd
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/spf13/cobra"
 
-	"golang/tutorial/todo/internal/models"
-	"golang/tutorial/todo/internal/services/task"
+	"golang/tutorial/todo/internal/adapters/convert"
+	"golang/tutorial/todo/internal/services/tasksvc"
 )
 
-func newUpdateCmd(svc task.TaskService) *cobra.Command {
+func newUpdateCmd(svc tasksvc.TaskService) *cobra.Command {
 	var updateCmd = &cobra.Command{
 		Use:   "update",
 		Short: "Update an existing task",
 		Long:  "You can update an existing task in your todo list with this command.",
 		Args:  cobra.MinimumNArgs(1),
 		Run: func(cmd *cobra.Command, args []string) {
-			updates := models.TaskUpdate{}
+			// TODO: configで設定する
+			loc, _ := time.LoadLocation("Asia/Tokyo")
+
+			params := convert.UpdateParams{}
 			if status, _ := cmd.Flags().GetString("status"); status != "" {
-				updates.Status = &status
+				params.Status = &status
 			}
 			if due, _ := cmd.Flags().GetString("due"); due != "" {
-				updates.Due = &due
+				params.DueAt = &due
 			}
 			if name, _ := cmd.Flags().GetString("name"); name != "" {
-				updates.Name = &name
+				params.Name = &name
 			}
-			err := svc.UpdateTask(args[0], updates)
+			upd, err := convert.FromUpdateInput(params, loc)
+			if err != nil {
+				fmt.Printf("Error: %v\n", err)
+				return
+			}
+			_, err = svc.UpdateTask(args[0], upd)
 			if err != nil {
 				fmt.Printf("Error: %v\n", err)
 				return
