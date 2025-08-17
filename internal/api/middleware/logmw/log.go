@@ -6,32 +6,37 @@ import (
 	"time"
 )
 
-type statusWriter struct {
-	// NOTE: http.ResponseWriterを埋め込む = extendsのような感じ
-	//       メゾッドをオーバーライドすることが可能
+// Reference: O'REILLY「実用GO言語」10.5.2 p.244
+type LoggingResponseWriter struct {
 	http.ResponseWriter
-	status int
-	length int
+	statusCode int
+	length     int
 }
 
-func (w *statusWriter) WriteHeader(code int) {
-	w.status = code
-	w.ResponseWriter.WriteHeader(code)
+func NewLoggingResponseWriter(w http.ResponseWriter) *LoggingResponseWriter {
+	return &LoggingResponseWriter{ResponseWriter: w}
 }
 
-func (w *statusWriter) Write(b []byte) (int, error) {
-	if w.status == 0 {
-		w.status = http.StatusOK
+func (lrw *LoggingResponseWriter) WriteHeader(statusCode int) {
+	lrw.statusCode = statusCode
+	lrw.ResponseWriter.WriteHeader(statusCode)
+}
+
+func (lrw *LoggingResponseWriter) Write(b []byte) (int, error) {
+	if lrw.statusCode == 0 {
+		lrw.statusCode = http.StatusOK
+	} else if lrw.statusCode >= 400 {
+		log.Printf("client error: %s", b)
 	}
-	size, err := w.ResponseWriter.Write(b)
-	w.length += size
+	size, err := lrw.ResponseWriter.Write(b)
+	lrw.length += size
 	return size, err
 }
 
-func Log(next http.Handler) http.Handler {
+func Logger(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		start := time.Now()
-		sw := &statusWriter{ResponseWriter: w}
+		sw := NewLoggingResponseWriter(w)
 
 		next.ServeHTTP(sw, r)
 
@@ -39,7 +44,7 @@ func Log(next http.Handler) http.Handler {
 			"%s %s %d %dB %s",
 			r.Method,
 			r.URL.Path,
-			sw.status,
+			sw.statusCode,
 			sw.length,
 			time.Since(start),
 		)

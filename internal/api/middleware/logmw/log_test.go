@@ -14,24 +14,7 @@ import (
 	"golang/tutorial/todo/internal/api/middleware/logmw"
 )
 
-func TestLog_PassThroughResponse(t *testing.T) {
-	h := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("X-Test", "ok")
-		w.WriteHeader(http.StatusTeapot)
-		_, _ = w.Write([]byte("hello"))
-	})
-
-	rec := httptest.NewRecorder()
-	req := httptest.NewRequest(http.MethodGet, "/test", nil)
-
-	logmw.Log(h).ServeHTTP(rec, req)
-
-	assert.Equal(t, http.StatusTeapot, rec.Code)
-	assert.Equal(t, "ok", rec.Header().Get("X-Test"))
-	assert.Equal(t, "hello", rec.Body.String())
-}
-
-func TestLog_EmitsMethodPathAndDuration(t *testing.T) {
+func TestLog_EmitsStatusCodeAndLength(t *testing.T) {
 	var buf bytes.Buffer
 	origOut := log.Writer()
 	origFlags := log.Flags()
@@ -44,20 +27,26 @@ func TestLog_EmitsMethodPathAndDuration(t *testing.T) {
 
 	h := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		time.Sleep(1 * time.Millisecond)
+		w.Header().Set("Content-Type", "text/plain")
 		w.WriteHeader(http.StatusOK)
+		_, _ = w.Write([]byte("hello world"))
 	})
 
 	rec := httptest.NewRecorder()
-	req := httptest.NewRequest(http.MethodPost, "/log", nil)
+	req := httptest.NewRequest(http.MethodGet, "/log", nil)
 
-	logmw.Log(h).ServeHTTP(rec, req)
+	logmw.Logger(h).ServeHTTP(rec, req)
 
 	assert.Equal(t, http.StatusOK, rec.Code)
+	assert.Equal(t, "text/plain", rec.Header().Get("Content-Type"))
+	assert.Equal(t, "hello world", rec.Body.String())
 
 	out := buf.String()
 	assert.NotEmpty(t, out)
-	assert.Contains(t, out, "POST")
+	assert.Contains(t, out, "GET")
 	assert.Contains(t, out, "/log")
+	assert.Contains(t, out, "200")
+	assert.Contains(t, out, "11B")
 
 	hasDurationSuffix := strings.Contains(out, "ns") ||
 		strings.Contains(out, "µs") ||

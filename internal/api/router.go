@@ -29,7 +29,7 @@ func (s *Router) Routes() http.Handler {
 	mux := http.NewServeMux()
 
 	// 個別にミドルウェア設定（この場合二度ログ出力される）
-	mux.Handle("GET /", logmw.Log(http.HandlerFunc((s.handleHelloworld))))
+	mux.Handle("GET /", logmw.Logger(http.HandlerFunc((s.handleHelloworld))))
 	mux.HandleFunc("GET /health", (s.handleHealth))
 	mux.HandleFunc("GET /panic", (s.handlePanic))
 
@@ -40,7 +40,7 @@ func (s *Router) Routes() http.Handler {
 	// 全てのルートにミドルウェアの設定
 	middlewares := []Middleware{
 		recovermw.Recover,
-		logmw.Log,
+		logmw.Logger,
 	}
 	var handler http.Handler = mux
 	for _, m := range middlewares {
