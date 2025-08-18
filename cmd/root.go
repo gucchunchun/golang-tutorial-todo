@@ -10,7 +10,7 @@ import (
 
 	"golang/tutorial/todo/internal/config"
 	"golang/tutorial/todo/internal/db"
-	"golang/tutorial/todo/internal/quotes"
+	"golang/tutorial/todo/internal/quote"
 	"golang/tutorial/todo/internal/services/quotesvc"
 	"golang/tutorial/todo/internal/services/tasksvc"
 	"golang/tutorial/todo/internal/storage/mysql"
@@ -45,7 +45,7 @@ func Execute() {
 	}
 	defer dbc.Close()
 
-	quoteClient := quotes.NewHTTPClient(os.Getenv("QUOTES_BASE_URL"), 10*time.Second)
+	quoteClient := quote.New(os.Getenv("QUOTES_BASE_URL"), 10*time.Second)
 	quoteSvc := quotesvc.NewQuoteService(quoteClient)
 	taskRepo := mysql.NewTaskRepo(dbc.DB())
 

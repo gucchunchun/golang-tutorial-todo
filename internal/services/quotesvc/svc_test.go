@@ -8,27 +8,32 @@ import (
 	"github.com/stretchr/testify/assert"
 
 	"golang/tutorial/todo/internal/apperr"
-	"golang/tutorial/todo/internal/quotes"
-	"golang/tutorial/todo/testutils/quotetest"
+	"golang/tutorial/todo/internal/quote"
 )
+
+type quoteClientTest func(ctx context.Context) (quote.Quote, error)
+
+func (q quoteClientTest) RandomQuote(ctx context.Context) (quote.Quote, error) {
+	return q(ctx)
+}
 
 var errStub = errors.New("stub")
 
 func TestQuoteService(t *testing.T) {
 	t.Run("GetRandomQuote", func(t *testing.T) {
 		tests := map[string]struct {
-			stubFunc func(ctx context.Context) (quotes.Quote, error)
+			stubFunc func(ctx context.Context) (quote.Quote, error)
 			wantErr  bool
 		}{
 			"ok": {
-				stubFunc: func(ctx context.Context) (quotes.Quote, error) {
-					return quotes.Quote{Author: "Ada", Text: "Keep going"}, nil
+				stubFunc: func(ctx context.Context) (quote.Quote, error) {
+					return quote.Quote{Author: "Ada", Text: "Keep going"}, nil
 				},
 				wantErr: false,
 			},
 			"error": {
-				stubFunc: func(ctx context.Context) (quotes.Quote, error) {
-					return quotes.Quote{}, errStub
+				stubFunc: func(ctx context.Context) (quote.Quote, error) {
+					return quote.Quote{}, errStub
 				},
 				wantErr: true,
 			},
@@ -38,7 +43,7 @@ func TestQuoteService(t *testing.T) {
 			t.Run(name, func(t *testing.T) {
 				t.Parallel()
 
-				svc := NewQuoteService(quotetest.QuoteClientTest(tc.stubFunc))
+				svc := NewQuoteService(quoteClientTest(tc.stubFunc))
 
 				_, err := svc.GetRandomQuote()
 				if !tc.wantErr {

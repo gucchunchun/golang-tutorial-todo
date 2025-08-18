@@ -1,4 +1,4 @@
-package quotes
+package quote
 
 type Quote struct {
 	Text   string `json:"q"`
