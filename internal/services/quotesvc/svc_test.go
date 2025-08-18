@@ -1,4 +1,4 @@
-package quotesvc_test
+package quotesvc
 
 import (
 	"context"
@@ -9,15 +9,8 @@ import (
 
 	"golang/tutorial/todo/internal/apperr"
 	"golang/tutorial/todo/internal/quotes"
-	"golang/tutorial/todo/internal/services/quotesvc"
+	"golang/tutorial/todo/testutils/quotetest"
 )
-
-// stub
-type quoteClientFunc func(ctx context.Context) (quotes.Quote, error)
-
-func (f quoteClientFunc) RandomQuote(ctx context.Context) (quotes.Quote, error) {
-	return f(ctx)
-}
 
 var errStub = errors.New("stub")
 
@@ -42,11 +35,10 @@ func TestQuoteService(t *testing.T) {
 		}
 
 		for name, tc := range tests {
-			tc := tc
 			t.Run(name, func(t *testing.T) {
 				t.Parallel()
 
-				svc := quotesvc.NewQuoteService(quoteClientFunc(tc.stubFunc))
+				svc := NewQuoteService(quotetest.QuoteClientTest(tc.stubFunc))
 
 				_, err := svc.GetRandomQuote()
 				if !tc.wantErr {

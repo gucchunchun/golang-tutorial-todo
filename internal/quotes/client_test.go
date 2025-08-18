@@ -1,4 +1,4 @@
-package quotes_test
+package quotes
 
 import (
 	"context"
@@ -8,8 +8,6 @@ import (
 	"net/http/httptest"
 	"testing"
 	"time"
-
-	"golang/tutorial/todo/internal/quotes"
 )
 
 const (
@@ -26,14 +24,14 @@ func TestHTTPClient_RandomQuote_OK(t *testing.T) {
 			t.Fatalf("unexpected path: %s", r.URL.Path)
 		}
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode([]quotes.Quote{{
+		json.NewEncoder(w).Encode([]Quote{{
 			Text:   testQuoteText,
 			Author: testQuoteAuthor,
 		}})
 	}))
 	defer ts.Close()
 
-	c := quotes.NewHTTPClient(ts.URL, 10*time.Second)
+	c := NewHTTPClient(ts.URL, 10*time.Second)
 
 	got, err := c.RandomQuote(context.Background())
 	if err != nil {
@@ -56,7 +54,7 @@ func TestHTTPClient_RandomQuote_BadStatus(t *testing.T) {
 	}))
 	defer ts.Close()
 
-	c := quotes.NewHTTPClient(ts.URL, 10*time.Second)
+	c := NewHTTPClient(ts.URL, 10*time.Second)
 
 	_, err := c.RandomQuote(context.Background())
 	if err == nil {
@@ -73,7 +71,7 @@ func TestHTTPClient_RandomQuote_InvalidJSON(t *testing.T) {
 	}))
 	defer ts.Close()
 
-	c := quotes.NewHTTPClient(ts.URL, 10*time.Second)
+	c := NewHTTPClient(ts.URL, 10*time.Second)
 
 	_, err := c.RandomQuote(context.Background())
 	if err == nil {
@@ -93,7 +91,7 @@ func TestHTTPClient_RandomQuote_Timeout(t *testing.T) {
 	}))
 	defer ts.Close()
 
-	c := quotes.NewHTTPClient(ts.URL, 10*time.Millisecond)
+	c := NewHTTPClient(ts.URL, 10*time.Millisecond)
 
 	_, err := c.RandomQuote(context.Background())
 	if err == nil {
