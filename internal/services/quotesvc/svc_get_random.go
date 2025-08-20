@@ -7,8 +7,8 @@ import (
 	"golang/tutorial/todo/internal/apperr"
 )
 
-func (s *QuoteService) GetRandomQuote() (string, error) {
-	quote, err := s.quoteClient.RandomQuote(context.Background())
+func (s Service) GetRandomQuote(ctx context.Context) (string, error) {
+	quote, err := s.quoteClient.RandomQuote(ctx)
 	if err != nil {
 		return "", apperr.E(apperr.CodeUnknown, "Failed to get random quote", err)
 	}

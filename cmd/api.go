@@ -2,19 +2,19 @@ package cmd
 
 import (
 	"context"
-	"log"
 	"net/http"
 	"time"
 
+	"github.com/rs/zerolog"
 	"github.com/spf13/cobra"
 
 	"golang/tutorial/todo/internal/api"
-	"golang/tutorial/todo/internal/services/quotesvc"
-	"golang/tutorial/todo/internal/services/tasksvc"
+	"golang/tutorial/todo/internal/api/handlers/quotehdl"
+	"golang/tutorial/todo/internal/api/handlers/taskhdl"
 )
 
-func runAPI(ctx context.Context, addr string, svc tasksvc.TaskService) error {
-	api := api.New(&svc)
+func runAPI(ctx context.Context, addr string, log *zerolog.Logger, quoteSvc quotehdl.QuoteService, taskSvc taskhdl.TaskService) error {
+	api := api.New(log, quoteSvc, taskSvc)
 	handler := api.Routes()
 
 	server := &http.Server{
@@ -22,7 +22,8 @@ func runAPI(ctx context.Context, addr string, svc tasksvc.TaskService) error {
 		Handler: handler,
 	}
 
-	log.Printf("listening on %s", addr)
+	log.Info().Msgf("listening on %s", addr)
+
 	go func() {
 		// Ctrl-C / cancel()が呼ばれた時にサーバーをシャットダウンする
 		<-ctx.Done()
@@ -37,16 +38,16 @@ func runAPI(ctx context.Context, addr string, svc tasksvc.TaskService) error {
 	return http.ListenAndServe(addr, handler)
 }
 
-func newAPICmd(quoteSvc quotesvc.QuoteService, svc tasksvc.TaskService) *cobra.Command {
+func newAPICmd(log *zerolog.Logger, quoteSvc quotehdl.QuoteService, taskSvc taskhdl.TaskService) *cobra.Command {
 	var apiCmd = &cobra.Command{
 		Use:   "api",
 		Short: "Run the HTTP API server",
 		Long:  "This command starts the HTTP API server for the todo application.",
 		Run: func(cmd *cobra.Command, args []string) {
 			addr, _ := cmd.Flags().GetString("addr")
-			log.Printf("Starting API server on %s", addr)
-			if err := runAPI(cmd.Context(), addr, svc); err != nil {
-				log.Fatalf("Failed to start API server: %v", err)
+			log.Info().Msgf("Starting API server on %s", addr)
+			if err := runAPI(cmd.Context(), addr, log, quoteSvc, taskSvc); err != nil {
+				log.Fatal().Msgf("Failed to start API server: %v", err)
 			}
 		},
 	}

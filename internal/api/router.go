@@ -5,9 +5,12 @@ import (
 	"net/http"
 	"time"
 
+	"golang/tutorial/todo/internal/api/handlers/quotehdl"
 	"golang/tutorial/todo/internal/api/handlers/taskhdl"
 	"golang/tutorial/todo/internal/api/middleware/logmw"
 	"golang/tutorial/todo/internal/api/middleware/recovermw"
+
+	"github.com/rs/zerolog"
 )
 
 type Middleware = func(next http.Handler) http.Handler
@@ -17,12 +20,14 @@ type Handler interface {
 }
 
 type Router struct {
+	logger   *zerolog.Logger
 	handlers []Handler
 }
 
-func New(taskService taskhdl.TaskService) *Router {
+func New(logger *zerolog.Logger, quoteSvc quotehdl.QuoteService, taskService taskhdl.TaskService) *Router {
 	return &Router{
-		handlers: []Handler{taskhdl.NewTaskHandler(taskService)},
+		logger:   logger,
+		handlers: []Handler{quotehdl.New(quoteSvc), taskhdl.NewTaskHandler(taskService)},
 	}
 }
 
@@ -30,7 +35,7 @@ func (s *Router) Routes() http.Handler {
 	mux := http.NewServeMux()
 
 	// 個別にミドルウェア設定（この場合二度ログ出力される）
-	mux.Handle("GET /", logmw.Logger(http.HandlerFunc((s.handleHelloworld))))
+	mux.Handle("GET /", logmw.Logger(s.logger)(http.HandlerFunc((s.handleHelloworld))))
 	mux.HandleFunc("GET /health", (s.handleHealth))
 	mux.HandleFunc("GET /panic", (s.handlePanic))
 
@@ -41,7 +46,7 @@ func (s *Router) Routes() http.Handler {
 	// 全てのルートにミドルウェアの設定
 	middlewares := []Middleware{
 		recovermw.Recover,
-		logmw.Logger,
+		logmw.Logger(s.logger),
 	}
 	var handler http.Handler = mux
 	for _, m := range middlewares {

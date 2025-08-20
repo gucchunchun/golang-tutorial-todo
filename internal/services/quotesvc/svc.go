@@ -9,12 +9,12 @@ type QuoteClient interface {
 	RandomQuote(ctx context.Context) (quote.Quote, error)
 }
 
-type QuoteService struct {
+type Service struct {
 	quoteClient QuoteClient
 }
 
-func NewQuoteService(quoteClient QuoteClient) *QuoteService {
-	return &QuoteService{
+func New(quoteClient QuoteClient) *Service {
+	return &Service{
 		quoteClient: quoteClient,
 	}
 }

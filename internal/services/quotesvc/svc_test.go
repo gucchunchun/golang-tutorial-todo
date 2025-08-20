@@ -43,9 +43,9 @@ func TestQuoteService(t *testing.T) {
 			t.Run(name, func(t *testing.T) {
 				t.Parallel()
 
-				svc := NewQuoteService(quoteClientTest(tc.stubFunc))
+				svc := New(quoteClientTest(tc.stubFunc))
 
-				_, err := svc.GetRandomQuote()
+				_, err := svc.GetRandomQuote(context.Background())
 				if !tc.wantErr {
 					assert.NoError(t, err)
 					return

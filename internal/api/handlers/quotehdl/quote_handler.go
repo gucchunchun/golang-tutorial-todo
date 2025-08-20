@@ -5,18 +5,17 @@ import (
 	"net/http"
 
 	"golang/tutorial/todo/internal/api/handlers"
-	"golang/tutorial/todo/internal/quote"
 )
 
 type QuoteService interface {
-	RandomQuote(ctx context.Context) (quote.Quote, error)
+	GetRandomQuote(ctx context.Context) (string, error)
 }
 
 type QuoteHandler struct {
 	QuoteService QuoteService
 }
 
-func NewQuoteHandler(quoteService QuoteService) *QuoteHandler {
+func New(quoteService QuoteService) *QuoteHandler {
 	return &QuoteHandler{
 		QuoteService: quoteService,
 	}
@@ -27,7 +26,7 @@ func (h *QuoteHandler) Routes(mux *http.ServeMux) {
 }
 
 func (h *QuoteHandler) get(w http.ResponseWriter, r *http.Request) {
-	q, err := h.QuoteService.RandomQuote(r.Context())
+	q, err := h.QuoteService.GetRandomQuote(r.Context())
 	if err != nil {
 		handlers.WriteError(w, err)
 		return

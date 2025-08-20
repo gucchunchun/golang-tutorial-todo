@@ -18,7 +18,7 @@ func NewTaskService(repo Repository) *TaskService {
 	}
 }
 
-func (s *TaskService) AddTask(c models.TaskCreate) (models.Task, error) {
+func (s TaskService) AddTask(c models.TaskCreate) (models.Task, error) {
 	log.Println("--- AddTask ---")
 	// バリデーション
 	if err := validation.ValidateCreateTaskInput(validation.CreateTaskInput{
@@ -37,7 +37,7 @@ func (s *TaskService) AddTask(c models.TaskCreate) (models.Task, error) {
 	return task, nil
 }
 
-func (s *TaskService) GetTask(taskID string) (models.TaskOutput, error) {
+func (s TaskService) GetTask(taskID string) (models.TaskOutput, error) {
 	parsedID, err := models.ParseTaskID(taskID)
 	if err != nil {
 		return models.TaskOutput{}, apperr.E(apperr.CodeInvalid, "Validation error", err)
@@ -51,7 +51,7 @@ func (s *TaskService) GetTask(taskID string) (models.TaskOutput, error) {
 	return task.TaskOutput(), nil
 }
 
-func (s *TaskService) ListTasks() ([]models.TaskOutput, error) {
+func (s TaskService) ListTasks() ([]models.TaskOutput, error) {
 	ctx := context.Background()
 	tasks, err := s.repo.List(ctx, 0, 0)
 	if err != nil {
@@ -61,7 +61,7 @@ func (s *TaskService) ListTasks() ([]models.TaskOutput, error) {
 	return tasks.TaskOutputs(), nil
 }
 
-func (s *TaskService) UpdateTask(taskID string, updates models.TaskUpdate) (models.Task, error) {
+func (s TaskService) UpdateTask(taskID string, updates models.TaskUpdate) (models.Task, error) {
 	// バリデーション
 	parsedID, err := models.ParseTaskID(taskID)
 	if err != nil {

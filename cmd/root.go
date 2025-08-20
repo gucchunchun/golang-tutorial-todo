@@ -1,15 +1,17 @@
 package cmd
 
 import (
+	"context"
 	"fmt"
-	"log"
 	"os"
 	"time"
 
+	"github.com/rs/zerolog"
 	"github.com/spf13/cobra"
 
 	"golang/tutorial/todo/internal/config"
 	"golang/tutorial/todo/internal/db"
+
 	"golang/tutorial/todo/internal/quote"
 	"golang/tutorial/todo/internal/services/quotesvc"
 	"golang/tutorial/todo/internal/services/tasksvc"
@@ -29,33 +31,38 @@ var rootCmd = &cobra.Command{
 	},
 }
 
-func setupCommands(quoteSvc quotesvc.QuoteService, taskService tasksvc.TaskService) {
-	rootCmd.AddCommand(newAddCmd(quoteSvc, taskService))
-	rootCmd.AddCommand(newListCmd(taskService))
-	rootCmd.AddCommand(newUpdateCmd(taskService))
-	rootCmd.AddCommand(newAPICmd(quoteSvc, taskService))
+func setupCommands(log *zerolog.Logger, quoteSvc quotesvc.Service, taskSvc tasksvc.TaskService) {
+	rootCmd.AddCommand(newAddCmd(quoteSvc, taskSvc))
+	rootCmd.AddCommand(newListCmd(taskSvc))
+	rootCmd.AddCommand(newUpdateCmd(taskSvc))
+	rootCmd.AddCommand(newAPICmd(log, quoteSvc, taskSvc))
 }
 
-func Execute() {
+func Execute(ctx context.Context) error {
+	// コンテキストからloggerを取得
+	lg := zerolog.Ctx(ctx)
+
 	// DBの初期化
 	cfg := config.NewDBConfig()
 	dbc := &db.Client{}
 	if err := dbc.Connect(cfg); err != nil {
-		log.Fatalf("DB connect failed: %v", err)
+		return fmt.Errorf("DB connect failed: %v", err)
 	}
+	lg.Info().Msg("DB connected")
 	defer dbc.Close()
 
 	quoteClient := quote.New(os.Getenv("QUOTES_BASE_URL"), 10*time.Second)
-	quoteSvc := quotesvc.NewQuoteService(quoteClient)
+	quoteSvc := quotesvc.New(quoteClient)
 	taskRepo := mysql.NewTaskRepo(dbc.DB())
 
 	// サービスの初期化
 	taskService := tasksvc.NewTaskService(taskRepo)
 
-	setupCommands(*quoteSvc, *taskService)
+	setupCommands(lg, *quoteSvc, *taskService)
 
 	if err := rootCmd.Execute(); err != nil {
-		fmt.Println(err)
-		os.Exit(1)
+		return fmt.Errorf("cobra command failed: %v", err)
 	}
+
+	return nil
 }

@@ -1,17 +1,19 @@
-package logmw_test
+package logmw
 
+// TODO: fix
 import (
 	"bytes"
 	"log"
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"strings"
 	"testing"
 	"time"
 
 	"github.com/stretchr/testify/assert"
 
-	"golang/tutorial/todo/internal/api/middleware/logmw"
+	"github.com/rs/zerolog"
 )
 
 func TestLog_EmitsStatusCodeAndLength(t *testing.T) {
@@ -35,7 +37,9 @@ func TestLog_EmitsStatusCodeAndLength(t *testing.T) {
 	rec := httptest.NewRecorder()
 	req := httptest.NewRequest(http.MethodGet, "/log", nil)
 
-	logmw.Logger(h).ServeHTTP(rec, req)
+	var logger = zerolog.New(os.Stdout).With().Timestamp().Logger()
+
+	Logger(&logger)(h).ServeHTTP(rec, req)
 
 	assert.Equal(t, http.StatusOK, rec.Code)
 	assert.Equal(t, "text/plain", rec.Header().Get("Content-Type"))

@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"context"
 	"fmt"
 	"time"
 
@@ -14,7 +15,7 @@ import (
 var setDueDate bool
 var sayQuote bool
 
-func newAddCmd(quoteSvc quotesvc.QuoteService, svc tasksvc.TaskService) *cobra.Command {
+func newAddCmd(quoteSvc quotesvc.Service, svc tasksvc.TaskService) *cobra.Command {
 	var addCmd = &cobra.Command{
 		Use:   "add",
 		Short: "Add new task",
@@ -48,7 +49,7 @@ func newAddCmd(quoteSvc quotesvc.QuoteService, svc tasksvc.TaskService) *cobra.C
 			fmt.Println("task added successfully")
 
 			if sayQuote {
-				quote, err := quoteSvc.GetRandomQuote()
+				quote, err := quoteSvc.GetRandomQuote(context.Background())
 				if err != nil {
 					fmt.Printf("Error fetching quote: %v\n", err)
 					return
