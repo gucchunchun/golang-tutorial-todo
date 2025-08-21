@@ -1,3 +1,4 @@
+// Package httpxtest golang/tutorial/todo/internal/httpx.httpx クライアントのテスト用ヘルパー
 package httpxtest
 
 import (
@@ -13,14 +14,18 @@ Reference: O'REILLY「実用GO言語」13.4.2 p.299 テストヘルパー用の�
 あるパッケージの機能をモックする場合は、{package}testという名称が一般的。
 */
 
-// メゾットが一つの場合：
+// メゾットが1つの場合：
+
+// TestClient は、httpx.ClientInterfaceを実装するテスト用クライアントの型です。
 type TestClient func(ctx context.Context, method, relPath string, body any, out any) error
 
+// DoJSON は、httpx.ClientInterfaceを実装するテスト用クライアントのメソッドです。
 func (t TestClient) DoJSON(ctx context.Context, method, relPath string, body any, out any) error {
 	return t(ctx, method, relPath, body, out)
 }
 
 // メゾットが複数の場合：
+
 // type TestClient struct {
 // 	DoJSONFunc func(ctx context.Context, method, relPath string, body any, out any) error
 // }
