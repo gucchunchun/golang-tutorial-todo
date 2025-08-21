@@ -1,0 +1,60 @@
+services:
+  db:
+    container_name: todo-mysql
+    image: mysql:8.0
+    env_file:
+      - ../../../.env
+    ports:
+      - "3306:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -uroot -p$MYSQL_ROOT_PASSWORD"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  migrate:
+    container_name: todo-migrate
+    image: migrate/migrate:v4.17.1
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - .internal/db/migrations:/migrations:ro
+  app:
+    container_name: todo-app
+    build:
+      context: ../../../.
+      dockerfile: build/docker/app/Dockerfile
+    image: todo-app:dev
+    env_file:
+      - ../../../.env
+    environment:
+      DB_HOST: db
+      DB_PORT: 3306
+      DB_USER: ${MYSQL_USER}
+      DB_PASSWORD: ${MYSQL_PASSWORD}
+      DB_NAME: ${MYSQL_DATABASE}
+    ports:
+      - "8080:8080"
+    depends_on:
+      db:
+        condition: service_healthy
+
+  cli:
+    container_name: todo-cli
+    image: todo-app:dev
+    depends_on:
+      db:
+        condition: service_healthy
+    entrypoint: ["/app/todo"]
+    restart: "no"
+    environment:
+      DB_HOST: db
+      DB_PORT: 3306
+      DB_USER: ${MYSQL_USER}
+      DB_PASSWORD: ${MYSQL_PASSWORD}
+      DB_NAME: ${MYSQL_DATABASE}
+volumes:
+  db_data:

@@ -30,7 +30,7 @@ func (w warnOnlyLevelWriter) WriteLevel(level zerolog.Level, p []byte) (int, err
 	return len(p), nil
 }
 
-func Setup(cfg Config) (zerolog.Logger, func(), error) {
+func Setup(cfg Config) (*zerolog.Logger, func(), error) {
 	zerolog.SetGlobalLevel(cfg.Level)
 
 	// デフォルトのフィールド名を変更できる
@@ -53,7 +53,7 @@ func Setup(cfg Config) (zerolog.Logger, func(), error) {
 	if cfg.FilePath != "" {
 		f, err := os.OpenFile(cfg.FilePath, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0o644)
 		if err != nil {
-			return zerolog.Logger{}, nil, err
+			return &zerolog.Logger{}, nil, err
 		}
 		file = f
 		writers = append(writers, f)
@@ -79,7 +79,7 @@ func Setup(cfg Config) (zerolog.Logger, func(), error) {
 		}
 	}
 
-	return base, cleanup, nil
+	return &base, cleanup, nil
 }
 
 // contextにloggerを埋め込む
