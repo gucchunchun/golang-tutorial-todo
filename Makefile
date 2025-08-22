@@ -32,6 +32,9 @@ docker-clean:
 docker-logs:
 	$(COMPOSE) -f $(COMPOSE_FILE) logs -f
 
+docker-logs-app:
+	$(COMPOSE) -f $(COMPOSE_FILE) logs -f app
+
 # ステータスの表示
 docker-ps:
 	$(COMPOSE) -f $(COMPOSE_FILE) ps
