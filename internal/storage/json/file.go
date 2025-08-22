@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"os"
-	"time"
 
 	"golang/tutorial/todo/internal/apperr"
 	"golang/tutorial/todo/internal/models"
@@ -55,13 +54,13 @@ func (s *Storage) saveTasks(tasks []models.Task) error {
 	return os.WriteFile(s.fileName, data, 0644)
 }
 
-func (s *Storage) Create(ctx context.Context, name string, dueAt *time.Time) (models.Task, error) {
+func (s *Storage) Create(ctx context.Context, name string, dueAt *models.Date) (models.Task, error) {
 	tasks, err := s.loadTasks()
 	if err != nil {
 		return models.Task{}, apperr.E(apperr.CodeUnknown, "Failed to load task", err)
 	}
 
-	newTask := models.NewTask(models.ParseTaskIDInt(len(tasks)+1), name, utils.SystemTime(), utils.SystemTime(), dueAt)
+	newTask := models.NewTask(models.ParseTaskIDInt(len(tasks)+1), name, models.Date(utils.SystemTime()), models.Date(utils.SystemTime()), dueAt)
 	if err != nil {
 		return models.Task{}, apperr.E(apperr.CodeInvalid, "Failed to create task", err)
 	}

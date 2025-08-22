@@ -78,6 +78,11 @@ func (s *TaskHandler) get(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *TaskHandler) getList(w http.ResponseWriter, r *http.Request) {
+	/*
+		Reference: O'REILLY「実用GO言語」8.1 p.173
+		スライスをエンコードする場合, nilスライスはnullとして扱われる。
+		そのためから配列としてエンコードするには、空のスライスを使用する必要がある。
+	*/
 	tasks, err := h.TaskService.ListTasks()
 	if err != nil {
 		handlers.WriteError(w, err)

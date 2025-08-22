@@ -38,7 +38,8 @@ func ParseDatePtr(s *string, loc *time.Location) (*models.Date, error) {
 	}
 	if t, err := time.ParseInLocation("2006-01-02", *s, loc); err == nil {
 		tt := t
-		return &tt, nil
+		d := models.Date(tt)
+		return &d, nil
 	}
 	return nil, fmt.Errorf("invalid due_date format: %q (YYYY-MM-DD)", *s)
 }

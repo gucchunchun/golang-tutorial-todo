@@ -45,7 +45,18 @@ func ReadJSON(r *http.Request, v any) error {
 
 	defer r.Body.Close()
 
+	/*
+		Reference: O'REILLY「実用GO言語」8.1 p.169
+		json.Decoder(): io.Readerインターフェースを満たしている型（os.Stdin, http.Response.Body...）
+		json.Unmarshal(): []byteを扱う場合
+	*/
 	decoder := json.NewDecoder(r.Body)
+
+	/*
+		Reference: O'REILLY「実用GO言語」8.1 p.174
+		デコード時に未知のフィールドがある場合にエラーとする。
+		エラーメッセージ: json: unknown field radius
+	*/
 	decoder.DisallowUnknownFields()
 
 	if err := decoder.Decode(v); err != nil {

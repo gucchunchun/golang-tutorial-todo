@@ -69,8 +69,66 @@ func ParseStatus(input string) (Status, error) {
 	}
 }
 
-// Date
-type Date = time.Time
+// Date アプリケーション内の日付型
+type Date time.Time
+
+func (d Date) Format() string {
+	return time.Time(d).Format("2006-01-02")
+}
+
+/*
+Reference: O'REILLY「実用GO言語」8.1 p.175
+MarshalerやUnmarshalerインターフェイスを実装することで、Date型をJSONで扱えるようにする。
+
+	type Marshaler interface {
+		MarshalJSON() ([]byte, error)
+	}
+
+	type Unmarshaler interface {
+		UnmarshalJSON([]byte) error}
+*/
+
+// MarshalJSON はエンコード時に、JSのDateで処理できるRFC3339に変換することでフロントエンドで扱いやすいようにする。
+func (d Date) MarshalJSON() ([]byte, error) {
+	tt := time.Time(d)
+	if tt.IsZero() {
+		return []byte("null"), nil
+	}
+	return []byte(`"` + tt.UTC().Format(time.RFC3339Nano) + `"`), nil
+}
+
+func (d *Date) UnmarshalJSON(b []byte) error {
+	var s string
+	if err := json.Unmarshal(b, &s); err != nil {
+		return err
+	}
+	tt, err := time.Parse(time.RFC3339Nano, s)
+	if err != nil {
+		return err
+	}
+	*d = Date(tt)
+	return nil
+}
+
+func (d Date) IsZero() bool {
+	tt := time.Time(d)
+	return tt.IsZero()
+}
+
+func (d Date) Before(t time.Time) bool {
+	tt := time.Time(d)
+	return tt.Before(t)
+}
+
+func (d Date) Sub(t time.Time) time.Duration {
+	tt := time.Time(d)
+	return tt.Sub(t)
+}
+
+func (d Date) In(loc *time.Location) time.Time {
+	tt := time.Time(d)
+	return tt.In(loc)
+}
 
 // TimeLeft
 type TimeLeft = time.Duration

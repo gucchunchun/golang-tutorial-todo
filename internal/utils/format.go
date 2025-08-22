@@ -3,6 +3,8 @@ package utils
 import (
 	"fmt"
 	"time"
+
+	"golang/tutorial/todo/internal/models"
 )
 
 const (
@@ -10,14 +12,14 @@ const (
 	DatetimeFormatOutput = DateFormatOutput + " 15:04:05"
 )
 
-func FormatDate(date time.Time) (string, error) {
+func FormatDate(date models.Date) (string, error) {
 	if date.IsZero() {
 		return "", nil
 	}
 	return date.In(time.Local).Format(DateFormatOutput), nil
 }
 
-func FormatDatetime(datetime time.Time) (string, error) {
+func FormatDatetime(datetime models.Date) (string, error) {
 	if datetime.IsZero() {
 		return "", nil
 	}
