@@ -41,7 +41,7 @@ func newAddCmd(quoteSvc quotesvc.Service, svc tasksvc.TaskService) *cobra.Comman
 				return
 			}
 
-			_, err = svc.AddTask(c)
+			_, err = svc.AddTask(cmd.Context(), c)
 			if err != nil {
 				fmt.Printf("Error: %v\n", err)
 				return

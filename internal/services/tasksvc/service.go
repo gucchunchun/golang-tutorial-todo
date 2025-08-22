@@ -2,38 +2,45 @@ package tasksvc
 
 import (
 	"context"
+
+	"github.com/rs/zerolog"
+
 	"golang/tutorial/todo/internal/apperr"
 	"golang/tutorial/todo/internal/models"
 	"golang/tutorial/todo/internal/validation"
-	"log"
 )
 
 type TaskService struct {
-	repo Repository
+	Logger *zerolog.Logger
+	repo   Repository
 }
 
-func NewTaskService(repo Repository) *TaskService {
+func NewTaskService(logger *zerolog.Logger, repo Repository) *TaskService {
 	return &TaskService{
-		repo: repo,
+		Logger: logger,
+		repo:   repo,
 	}
 }
 
-func (s TaskService) AddTask(c models.TaskCreate) (models.Task, error) {
-	log.Println("--- AddTask ---")
+func (s TaskService) AddTask(ctx context.Context, c models.TaskCreate) (models.Task, error) {
+	s.Logger.Debug().Msg("--- AddTask ---")
+	s.Logger.Debug().Interface("create", c).Msg("incoming create")
+
 	// バリデーション
-	if err := validation.ValidateCreateTaskInput(validation.CreateTaskInput{
+	if verrs := validation.ValidateCreateTaskInput(validation.CreateTaskInput{
 		Name:    c.Name,
 		DueDate: c.DueAt,
-	}); err != nil {
-		return models.Task{}, apperr.E(apperr.CodeInvalid, "Validation error", err)
+	}); verrs != nil {
+		s.Logger.Error().Interface("validation_errors", verrs).Msg("validation failed")
+		return models.Task{}, apperr.E(apperr.CodeInvalid, "Validation error", verrs)
 	}
-
-	ctx := context.Background()
 
 	task, err := s.repo.Create(ctx, c.Name, c.DueAt)
 	if err != nil {
+		s.Logger.Error().Err(err).Str("name", c.Name).Msg("repo.Create failed")
 		return models.Task{}, apperr.E(apperr.CodeUnknown, "Failed to create task", err)
 	}
+	s.Logger.Debug().Interface("task", task).Msg("created task")
 	return task, nil
 }
 

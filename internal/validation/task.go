@@ -6,7 +6,7 @@ import (
 
 type CreateTaskInput struct {
 	Name    string       `json:"name" validate:"required,min=1,max=255"`
-	DueDate *models.Date `json:"due_date" validate:"omitempty,datetime=2006-01-02"`
+	DueDate *models.Date `json:"due_date" validate:"omitempty"` // removed datetime=... (was for string)
 }
 
 func ValidateCreateTaskInput(input CreateTaskInput) Errors {
@@ -16,7 +16,7 @@ func ValidateCreateTaskInput(input CreateTaskInput) Errors {
 type UpdateTaskInput struct {
 	Name     *string        `json:"name" validate:"omitempty,min=1,max=255"`
 	Status   *models.Status `json:"status" validate:"omitempty,oneof=pending ongoing done"`
-	DueDate  *models.Date   `json:"due_date" validate:"omitempty,datetime=2006-01-02"`
+	DueDate  *models.Date   `json:"due_date" validate:"omitempty"` // removed datetime=...
 	ClearDue bool           `json:"clear_due" validate:"omitempty"`
 }
 

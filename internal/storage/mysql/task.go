@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"time"
 
 	"golang/tutorial/todo/internal/apperr"
 	"golang/tutorial/todo/internal/models"
@@ -45,9 +46,16 @@ func scanTasks(rows *sql.Rows) (models.Tasks, error) {
 }
 
 func (r *TaskRepo) Create(ctx context.Context, name string, dueAt *models.Date) (models.Task, error) {
+	var due *time.Time
+	if dueAt != nil && !dueAt.IsZero() {
+		d := dueAt.Time()
+		due = &d
+	} else {
+		due = nil
+	}
 	res, err := r.db.ExecContext(ctx,
 		`INSERT INTO tasks (name, status, due_at) VALUES (?, ?, ?)`,
-		name, models.StatusPending, dueAt,
+		name, models.StatusPending, due,
 	)
 	if err != nil {
 		return models.Task{}, err

@@ -1,8 +1,11 @@
 package taskhdl
 
 import (
+	"context"
 	"net/http"
 	"time"
+
+	"github.com/rs/zerolog"
 
 	"golang/tutorial/todo/internal/adapters/convert"
 	"golang/tutorial/todo/internal/api/handlers"
@@ -10,24 +13,27 @@ import (
 )
 
 type TaskService interface {
-	AddTask(c models.TaskCreate) (models.Task, error)
+	AddTask(ctx context.Context, c models.TaskCreate) (models.Task, error)
 	GetTask(taskID string) (models.TaskOutput, error)
 	ListTasks() ([]models.TaskOutput, error)
 	UpdateTask(taskID string, updates models.TaskUpdate) (models.Task, error)
 }
 
 type TaskHandler struct {
+	Logger      *zerolog.Logger
 	TaskService TaskService
 }
 
-func NewTaskHandler(taskService TaskService) *TaskHandler {
+func NewTaskHandler(logger *zerolog.Logger, taskService TaskService) *TaskHandler {
 	return &TaskHandler{
+		Logger:      logger,
 		TaskService: taskService,
 	}
 }
 
 func (h *TaskHandler) Routes(mux *http.ServeMux) {
 	mux.HandleFunc("POST /tasks", h.add)
+	mux.HandleFunc("POST /tasks/csv", h.bulkUploadCSV)
 	mux.HandleFunc("GET /tasks/{id}", h.get)
 	mux.HandleFunc("GET /tasks", h.getList)
 	mux.HandleFunc("PATCH /tasks/{id}", h.update)
@@ -52,7 +58,7 @@ func (h *TaskHandler) add(w http.ResponseWriter, r *http.Request) {
 
 	}
 
-	task, err := h.TaskService.AddTask(c)
+	task, err := h.TaskService.AddTask(r.Context(), c)
 	if err != nil {
 		handlers.WriteError(w, err)
 		return

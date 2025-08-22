@@ -33,8 +33,17 @@ func Validate[T any](input T) Errors {
 	}
 
 	if err := v.Struct(input); err != nil {
-		for _, fieldErr := range err.(validator.ValidationErrors) {
-			output.Add(fieldErr.StructField(), fieldErr.Error())
+		// validatorのエラーを処理
+		if inv, ok := err.(*validator.InvalidValidationError); ok {
+			output.Add("", inv.Error())
+			return output
+		}
+		if verrs, ok := err.(validator.ValidationErrors); ok {
+			for _, fe := range verrs {
+				output.Add(fe.StructField(), fe.Error())
+			}
+		} else {
+			output.Add("", err.Error())
 		}
 	}
 

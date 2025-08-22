@@ -27,7 +27,7 @@ type Router struct {
 func New(logger *zerolog.Logger, quoteSvc quotehdl.QuoteService, taskService taskhdl.TaskService) *Router {
 	return &Router{
 		logger:   logger,
-		handlers: []Handler{quotehdl.New(quoteSvc), taskhdl.NewTaskHandler(taskService)},
+		handlers: []Handler{quotehdl.New(quoteSvc), taskhdl.NewTaskHandler(logger, taskService)},
 	}
 }
 

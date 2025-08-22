@@ -52,7 +52,7 @@ func RunCLI(ctx context.Context) error {
 	quoteClient := quote.New(os.Getenv("QUOTES_BASE_URL"), 10*time.Second)
 	quoteSvc := quotesvc.New(quoteClient)
 	taskRepo := mysql.NewTaskRepo(deps.DB.DB())
-	taskService := tasksvc.NewTaskService(taskRepo)
+	taskService := tasksvc.NewTaskService(deps.Log, taskRepo)
 
 	setupCommands(deps.Log, *quoteSvc, *taskService)
 

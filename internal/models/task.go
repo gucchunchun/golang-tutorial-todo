@@ -73,7 +73,7 @@ func ParseStatus(input string) (Status, error) {
 type Date time.Time
 
 func (d Date) Format() string {
-	return time.Time(d).Format("2006-01-02")
+	return d.Time().Format("2006-01-02")
 }
 
 /*
@@ -90,7 +90,7 @@ MarshalerやUnmarshalerインターフェイスを実装することで、Date�
 
 // MarshalJSON はエンコード時に、JSのDateで処理できるRFC3339に変換することでフロントエンドで扱いやすいようにする。
 func (d Date) MarshalJSON() ([]byte, error) {
-	tt := time.Time(d)
+	tt := d.Time()
 	if tt.IsZero() {
 		return []byte("null"), nil
 	}
@@ -111,23 +111,27 @@ func (d *Date) UnmarshalJSON(b []byte) error {
 }
 
 func (d Date) IsZero() bool {
-	tt := time.Time(d)
+	tt := d.Time()
 	return tt.IsZero()
 }
 
 func (d Date) Before(t time.Time) bool {
-	tt := time.Time(d)
+	tt := d.Time()
 	return tt.Before(t)
 }
 
 func (d Date) Sub(t time.Time) time.Duration {
-	tt := time.Time(d)
+	tt := d.Time()
 	return tt.Sub(t)
 }
 
 func (d Date) In(loc *time.Location) time.Time {
-	tt := time.Time(d)
+	tt := d.Time()
 	return tt.In(loc)
+}
+
+func (d Date) Time() time.Time {
+	return time.Time(d)
 }
 
 // TimeLeft
