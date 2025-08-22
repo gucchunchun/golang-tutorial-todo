@@ -36,6 +36,7 @@ func (h *TaskHandler) Routes(mux *http.ServeMux) {
 	mux.HandleFunc("POST /tasks/csv", h.bulkUploadCSV)
 	mux.HandleFunc("GET /tasks/{id}", h.get)
 	mux.HandleFunc("GET /tasks", h.getList)
+	mux.HandleFunc("GET /tasks/csv", h.downloadCSV)
 	mux.HandleFunc("PATCH /tasks/{id}", h.update)
 }
 
