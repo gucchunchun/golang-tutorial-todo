@@ -25,6 +25,7 @@ require (
 	github.com/rs/xid v1.6.0 // indirect
 	github.com/rs/zerolog v1.34.0 // indirect
 	github.com/spf13/pflag v1.0.6 // indirect
+	github.com/spkg/bom v1.0.1 // indirect
 	github.com/yuin/goldmark v1.4.13 // indirect
 	golang.org/x/crypto v0.41.0 // indirect
 	golang.org/x/mod v0.27.0 // indirect

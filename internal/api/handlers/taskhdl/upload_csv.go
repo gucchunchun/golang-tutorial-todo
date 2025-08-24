@@ -9,6 +9,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/spkg/bom"
+
 	"golang/tutorial/todo/internal/adapters/convert"
 	"golang/tutorial/todo/internal/api/handlers"
 )
@@ -35,8 +37,11 @@ func (h *TaskHandler) bulkUploadCSV(w http.ResponseWriter, r *http.Request) {
 	/*
 		Reference: O'REILLY「実用GO言語」8.2 p.180
 		基本的にCSVに関しては、encoding/json パッケージを使用してJSON形式に変換することができる
+
+		Reference: O'REILLY「実用GO言語」8.2 p.182
+		BOM付きのCSVファイルを処理するには、github.com/spkg/bom パッケージを使用する
 	*/
-	reader := csv.NewReader(file)
+	reader := csv.NewReader(bom.NewReader(file))
 
 	var createdIDs []string
 	line := 0
