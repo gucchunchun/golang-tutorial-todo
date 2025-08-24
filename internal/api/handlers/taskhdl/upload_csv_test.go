@@ -63,6 +63,14 @@ func TestBulkUploadCSV_Success(t *testing.T) {
 				{Name: "Read book", DueAt: &due3},
 			},
 		},
+		{
+			"valid with comment out line",
+			"tasks_valid_with_comment.csv",
+			[]testTaskInput{
+				{Name: "Buy milk", DueAt: &due1},
+				{Name: "Pay bills", DueAt: nil},
+			},
+		},
 	}
 
 	for _, test := range tests {
