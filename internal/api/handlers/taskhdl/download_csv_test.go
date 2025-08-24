@@ -2,70 +2,56 @@ package taskhdl
 
 import (
 	"encoding/csv"
+	"golang/tutorial/todo/internal/models"
 	"net/http"
 	"net/http/httptest"
-	"strings"
 	"testing"
 	"time"
 
-	"golang/tutorial/todo/internal/models"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestDownloadCSV_Success(t *testing.T) {
-	due := models.Date(time.Date(2025, 8, 30, 0, 0, 0, 0, time.UTC))
-	task := models.Task{ID: 1, Name: "Task 1", Status: models.StatusPending, DueAt: &due}
-	outputs := models.Tasks{task}.TaskOutputs()
+	d := models.Date(time.Date(2025, 8, 30, 0, 0, 0, 0, time.UTC))
+	task := models.Task{
+		ID:     1,
+		Name:   "Task 1",
+		Status: models.StatusPending,
+		DueAt:  &d,
+	}
+	out := (models.Tasks{task}).TaskOutputs()
 
-	svc := &stubTaskService{listTasksFunc: func(s *stubTaskService) ([]models.TaskOutput, error) { return outputs, nil }}
+	svc := &stubTaskService{
+		listTasksFunc: func(s *stubTaskService) ([]models.TaskOutput, error) {
+			return out, nil
+		},
+	}
 	h := &TaskHandler{Logger: getTestLogger(), TaskService: svc}
 
 	req := httptest.NewRequest(http.MethodGet, "/tasks/csv", nil)
 	rec := httptest.NewRecorder()
 	h.downloadCSV(rec, req)
-
 	res := rec.Result()
-	if ct := res.Header.Get("Content-Type"); ct != "text/csv" {
-		t.Fatalf("expected Content-Type text/csv, got %q", ct)
-	}
-	if cd := res.Header.Get("Content-Disposition"); !strings.Contains(cd, "tasks.csv") {
-		t.Fatalf("expected filename in Content-Disposition, got %q", cd)
-	}
-	if res.StatusCode != http.StatusOK {
-		t.Fatalf("expected status 200, got %d", res.StatusCode)
-	}
 
-	reader := csv.NewReader(rec.Body)
-	records, err := reader.ReadAll()
-	if err != nil {
-		t.Fatalf("failed reading CSV: %v", err)
-	}
-	if len(records) != 2 {
-		t.Fatalf("expected 2 rows, got %d", len(records))
-	}
-	header := records[0]
-	expectedHeader := []string{"ID", "Name", "Status", "Due Date", "TimeLeft"}
-	if len(header) != len(expectedHeader) {
-		t.Fatalf("unexpected header length: %d", len(header))
-	}
-	for i, col := range expectedHeader {
-		if header[i] != col {
-			t.Fatalf("header[%d]=%q want %q", i, header[i], col)
-		}
-	}
+	require.Equal(t, http.StatusOK, res.StatusCode)
+	require.Equal(t, "text/csv", res.Header.Get("Content-Type"))
+	assert.Contains(t, res.Header.Get("Content-Disposition"), "tasks.csv")
+
+	r := csv.NewReader(rec.Body)
+	records, err := r.ReadAll()
+	require.NoError(t, err)
+	require.Len(t, records, 2, "expect header + single data row")
+
+	expectedHeader := []string{"ID", "タスク名", "ステータス", "作成日", "更新日", "期限", "残り時間"}
+	require.Equal(t, expectedHeader, records[0], "CSV header mismatch")
+
 	row := records[1]
-	if row[0] != task.ID.String() {
-		t.Errorf("ID=%q want %q", row[0], task.ID.String())
-	}
-	if row[1] != task.Name {
-		t.Errorf("Name=%q want %q", row[1], task.Name)
-	}
-	if row[2] == "" {
-		t.Errorf("Status empty")
-	}
-	if row[3] == "" {
-		t.Errorf("Due Date empty")
-	}
-	if row[4] == "" {
-		t.Errorf("TimeLeft empty; expected a duration since due date is in future")
-	}
+	require.GreaterOrEqual(t, len(row), len(expectedHeader))
+
+	assert.Equal(t, task.ID.String(), row[0])
+	assert.Equal(t, task.Name, row[1])
+	assert.NotEmpty(t, row[2], "status should not be empty")
+	assert.NotEmpty(t, row[5], "due date should not be empty")
+	assert.NotEmpty(t, row[6], "remaining time should not be empty (future due date)")
 }

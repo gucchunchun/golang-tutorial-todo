@@ -56,6 +56,7 @@ func (s Status) String() string {
 	}
 	return statusNames[s]
 }
+
 func ParseStatus(input string) (Status, error) {
 	switch strings.ToLower(input) {
 	case "pending":
@@ -68,6 +69,8 @@ func ParseStatus(input string) (Status, error) {
 		return -1, fmt.Errorf("invalid status: %s", input)
 	}
 }
+
+func (s Status) MarshalCSV() (string, error) { return s.String(), nil }
 
 // Date アプリケーション内の日付型
 type Date time.Time
@@ -110,6 +113,18 @@ func (d *Date) UnmarshalJSON(b []byte) error {
 	return nil
 }
 
+/*
+Reference: O'REILLY「実用GO言語」8.2.8 p.185
+CSVのデコード/エンコードを拡張する。
+*/
+func (d Date) MarshalCSV() (string, error) {
+	t := d.Time()
+	if t.IsZero() {
+		return "", nil
+	}
+	return t.UTC().Format("2006-01-02"), nil
+}
+
 func (d Date) IsZero() bool {
 	tt := d.Time()
 	return tt.IsZero()
@@ -148,13 +163,13 @@ type Task struct {
 }
 
 type TaskOutput struct {
-	ID        TaskID    `json:"id"`
-	Name      string    `json:"name"`
-	Status    Status    `json:"status"`
-	CreatedAt Date      `json:"created_at"`
-	UpdatedAt Date      `json:"updated_at"`
-	DueAt     *Date     `json:"due_date"`
-	TimeLeft  *TimeLeft `json:"time_left"`
+	ID        TaskID    `json:"id" csv:"ID"`
+	Name      string    `json:"name" csv:"タスク名"`
+	Status    Status    `json:"status" csv:"ステータス"`
+	CreatedAt Date      `json:"created_at" csv:"作成日"`
+	UpdatedAt Date      `json:"updated_at" csv:"更新日"`
+	DueAt     *Date     `json:"due_date" csv:"期限"`
+	TimeLeft  *TimeLeft `json:"time_left" csv:"残り時間"`
 }
 
 func (t *Task) TaskOutput() TaskOutput {
