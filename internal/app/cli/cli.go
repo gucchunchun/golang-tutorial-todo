@@ -33,11 +33,13 @@ func setupCommands(log *zerolog.Logger, quoteSvc quotesvc.Service, taskSvc tasks
 	rootCmd.AddCommand(newAddCmd(quoteSvc, taskSvc))
 	rootCmd.AddCommand(newListCmd(taskSvc))
 	rootCmd.AddCommand(newUpdateCmd(taskSvc))
+	rootCmd.AddCommand(newEncryptCmd())
+	rootCmd.AddCommand(newDecryptCmd())
 }
 
 func RunCLI(ctx context.Context) error {
 	deps, err := bootstrap.Init(ctx, bootstrap.Options{
-		Service:         "todo-server",
+		Service:         "todo-cli",
 		LogFile:         "",
 		Level:           zerolog.DebugLevel,
 		ConsoleWarnOnly: false,
@@ -60,5 +62,12 @@ func RunCLI(ctx context.Context) error {
 		return fmt.Errorf("cobra command failed: %v", err)
 	}
 
+	return nil
+}
+
+func requiredInput(value string, name string) error {
+	if value == "" {
+		return fmt.Errorf("%s is required", name)
+	}
 	return nil
 }

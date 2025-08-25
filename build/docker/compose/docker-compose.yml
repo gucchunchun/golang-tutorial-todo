@@ -51,19 +51,5 @@ services:
       db:
         condition: service_healthy
 
-  cli:
-    container_name: todo-cli
-    image: todo-app:dev
-    depends_on:
-      db:
-        condition: service_healthy
-    entrypoint: ["/app/todo"]
-    restart: "no"
-    environment:
-      DB_HOST: db
-      DB_PORT: 3306
-      DB_USER: ${MYSQL_USER}
-      DB_PASSWORD: ${MYSQL_PASSWORD}
-      DB_NAME: ${MYSQL_DATABASE}
 volumes:
   db_data:

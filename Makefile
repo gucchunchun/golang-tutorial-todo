@@ -1,6 +1,6 @@
 # もしコマンド名と同じファイルがあったとしてもコマンドとして実行されるようにする
 
-.PHONY: hello nfile docker-up docker-up-build docker-down docker-clean docker-logs docker-ps docker-restart app-sh db-sh
+.PHONY: hello nfile docker-up docker-up-build docker-down docker-clean docker-logs docker-ps docker-restart app-sh db-sh cli
 
 COMPOSE       ?= docker compose
 COMPOSE_FILE  ?= build/docker/compose/docker-compose.yml
@@ -45,8 +45,12 @@ docker-restart:
 
 # シェルに入る (appコンテナ)
 app-sh:
-	$(COMPOSE) -f $(COMPOSE_FILE) exec app sh
+	$(COMPOSE) -f $(COMPOSE_FILE) exec app bash
 
 # シェルに入る (dbコンテナ)
 db-sh:
 	$(COMPOSE) -f $(COMPOSE_FILE) exec db sh
+
+# CLIアプリケーションを使用
+cli:
+	$(COMPOSE) -f $(COMPOSE_FILE) run --rm --entrypoint /app/todo app $(ARGS)
