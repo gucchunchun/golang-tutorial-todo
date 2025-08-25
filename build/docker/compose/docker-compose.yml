@@ -50,6 +50,8 @@ services:
     depends_on:
       db:
         condition: service_healthy
+    volumes:
+      - ./logs:/var/log/app
 
 volumes:
   db_data:
