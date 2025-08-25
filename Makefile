@@ -54,3 +54,8 @@ db-sh:
 # CLIアプリケーションを使用
 cli:
 	$(COMPOSE) -f $(COMPOSE_FILE) run --rm --entrypoint /app/todo app $(ARGS)
+
+# 生ログ取得（ローカル）
+bench:
+	@mkdir -p benchmarks/raw
+	go test -run=Benchmark -bench=Benchmark -benchmem ./... | tee benchmarks/raw/bench_$(shell date -u +"%Y%m%dT%H%M%SZ")_$(shell git rev-parse --short HEAD).txt
