@@ -6,14 +6,6 @@ import (
 )
 
 /*
-Reference: O'REILLY「実用GO言語」13.1 p.293
-1. ファイル名を"**_test.go"とする
-2. テスト関数を"Test**", 引数を"t *testing.T"とする
-3. テストの検証
-4. テストの実行　```go test -v``` OR ```go test -v -run Test**`
-*/
-
-/*
 Reference: O'REILLY「実用GO言語」13.3 p.297 テストに事前ぜ後の処理を追加する
 1. ファイル名を"**_test.go"とする
 2. テスト関数を"Test**", 引数を"t *testing.T"とする
@@ -44,7 +36,6 @@ func TestAdd(t *testing.T) {
 }
 
 /*
-*
 Reference: O'REILLY「実用GO言語」13.2 p.294 Table Driven Testを実装する
 TDT = テストの入力値と期待値をまとめて定義し、テストの実行箇所を一箇所にまとめる
 */
@@ -111,5 +102,52 @@ func TestCalc(t *testing.T) {
 				t.Errorf("Calc() got = %v, want %v", got, tt.want)
 			}
 		})
+	}
+}
+
+/*
+Reference: O'REILLY「実用GO言語」13.6.4 p.303
+時間がかかるテストをスキップしたい場合、```-short```フラグを使う
+*/
+func TestShortSkip(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping test in short mode.")
+	}
+}
+
+/*
+Reference: O'REILLY「実用GO言語」13.11 p.321 ベンチマークを取る
+下記の例の実行結果：
+```
+go test -bench Benchmark -run Benchmark -benchmem
+
+BenchmarkAppendSlice-8            528517              2264 ns/op           25208 B/op         12 allocs/op
+BenchmarkAppendSliceBetter-8     1200562               989.6 ns/op          8192 B/op          1 allocs/op
+````
+*/
+func AppendSlice(count, value int) []int {
+	var s []int
+	for i := 0; i < count; i++ {
+		s = append(s, value)
+	}
+	return s
+}
+func AppendSliceBetter(count, value int) []int {
+	s := make([]int, 0, count)
+	for i := 0; i < count; i++ {
+		s = append(s, value)
+	}
+	return s
+}
+func BenchmarkAppendSlice(b *testing.B) {
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		_ = AppendSlice(1000, 42)
+	}
+}
+func BenchmarkAppendSliceBetter(b *testing.B) {
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		_ = AppendSliceBetter(1000, 42)
 	}
 }
