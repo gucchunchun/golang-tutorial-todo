@@ -35,6 +35,7 @@ func setupCommands(log *zerolog.Logger, quoteSvc quotesvc.Service, taskSvc tasks
 	rootCmd.AddCommand(newUpdateCmd(taskSvc))
 	rootCmd.AddCommand(newEncryptCmd())
 	rootCmd.AddCommand(newDecryptCmd())
+	rootCmd.AddCommand(newLogAnalyzeCmd())
 }
 
 func RunCLI(ctx context.Context) error {

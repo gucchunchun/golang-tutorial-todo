@@ -66,6 +66,26 @@ golang-tutorial-todo/
   go run golang/tutorial/todo/cmd/todo decrypt -i {SrcFilePath} -o {DestFilePath} -p {PW}
   ```
 
+- APIアクセスログ解析
+
+  コマンド：
+  ```
+  make cli ARGS="log-analyze"
+  ```
+  結果：
+  ```
+  Requests: 11
+  Period : 2025-08-25T15:36:37+09:00 〜 2025-08-25T22:10:39+09:00
+  Status : 200:7 400:4 
+  Class  : 2xx:7 3xx:0 4xx:4 5xx:0 other:0
+  Latency(ms) min:0 avg:1.7 p50:0 p95:9 p99:13 max:15
+
+  Top endpoints:
+  1.      6  /tasks
+  2.      5  /health
+ ```
+
+
 #### エンドポイント
 
 * `GET /tasks/{id}` - タスク取得
@@ -143,6 +163,25 @@ golang-tutorial-todo/
   ```
   go run golang/tutorial/todo/cmd/todo decrypt -i {SrcFilePath} -o {DestFilePath} -p {PW}
   ```
+
+- API Access Log Analysis
+
+  Command：
+  ```
+  make cli ARGS="log-analyze"
+  ```
+  result：
+  ```
+  Requests: 11
+  Period : 2025-08-25T15:36:37+09:00 〜 2025-08-25T22:10:39+09:00
+  Status : 200:7 400:4 
+  Class  : 2xx:7 3xx:0 4xx:4 5xx:0 other:0
+  Latency(ms) min:0 avg:1.7 p50:0 p95:9 p99:13 max:15
+
+  Top endpoints:
+  1.      6  /tasks
+  2.      5  /health
+ ```
 
 #### Endpoints
 

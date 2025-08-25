@@ -57,5 +57,5 @@ cli:
 
 # 生ログ取得（ローカル）
 bench:
-	@mkdir -p benchmarks/raw
+	@mkdir -p benchmarks/ra
 	go test -run=Benchmark -bench=Benchmark -benchmem ./... | tee benchmarks/raw/bench_$(shell date -u +"%Y%m%dT%H%M%SZ")_$(shell git rev-parse --short HEAD).txt
