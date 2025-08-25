@@ -9,13 +9,10 @@
 
 * **CLI**: ターミナルからタスクを追加・一覧・更新できる
 * **REST API**: タスク管理用のエンドポイントを提供
-* **Web UI**: テンプレートと静的ファイルを使用した簡易 UI
 * **ストレージ**:
-
   * MySQL (デフォルト)
   * JSON ファイル（ローカル用・学習用）
 * **その他の機能**:
-
   * 構造化ロギング
   * 入力バリデーション
   * 名言 API との連携（ランダムな名言表示）
@@ -41,6 +38,33 @@ golang-tutorial-todo/
 ├── tasks.json          # JSON ストレージ用サンプルタスク
 └── go.mod              # Go モジュール
 ```
+
+### 使用方法
+
+#### cli
+- タスク一覧取得
+
+  コマンド：
+  ```
+  go run golang/tutorial/todo/cmd/todo list
+  ```
+  結果：
+  ```
+    ID                                   | Name                 | Status   | CreatedAt           | DueDate     | TimeLeft
+  -----------------------------------------------------------------------------------------
+  11               | Read book            | Pending  | 2025-08-24 18:40:00 | 2025-12-31  | 128 days       
+  10               | Pay bills            | Pending  | 2025-08-24 18:40:00 | -           | -              
+  9                | Buy milk             | Pending  | 2025-08-24 18:40:00 | 2025-09-01  | 7 days         
+  8                | Read book            | Pending  | 2025-08-24 17:54:16 | 2025-12-31  | 128 days       
+  ```
+
+- ファイル暗号化・複合化
+  ```
+  go run golang/tutorial/todo/cmd/todo encrypt -i {SrcFilePath} -o {DestFilePath} -p {PW}
+  ```
+  ```
+  go run golang/tutorial/todo/cmd/todo decrypt -i {SrcFilePath} -o {DestFilePath} -p {PW}
+  ```
 
 #### エンドポイント
 
@@ -92,6 +116,34 @@ golang-tutorial-todo/
 ├── tasks.json          # Sample tasks for JSON storage
 └── go.mod              # Go modules
 ```
+
+### How to Use
+
+#### cli
+- Fetch Task List
+
+  Command：
+  ```
+  go run golang/tutorial/todo/cmd/todo list
+  ```
+  Result：
+  ```
+    ID                                   | Name                 | Status   | CreatedAt           | DueDate     | TimeLeft
+  -----------------------------------------------------------------------------------------
+  11               | Read book            | Pending  | 2025-08-24 18:40:00 | 2025-12-31  | 128 days       
+  10               | Pay bills            | Pending  | 2025-08-24 18:40:00 | -           | -              
+  9                | Buy milk             | Pending  | 2025-08-24 18:40:00 | 2025-09-01  | 7 days         
+  8                | Read book            | Pending  | 2025-08-24 17:54:16 | 2025-12-31  | 128 days       
+  ```
+
+- File En/Decryption
+  ```
+  go run golang/tutorial/todo/cmd/todo encrypt -i {SrcFilePath} -o {DestFilePath} -p {PW}
+  ```
+  ```
+  go run golang/tutorial/todo/cmd/todo decrypt -i {SrcFilePath} -o {DestFilePath} -p {PW}
+  ```
+
 #### Endpoints
 
 * `GET /tasks/{id}` - Fetch a task
