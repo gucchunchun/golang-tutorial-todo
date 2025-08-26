@@ -70,7 +70,7 @@ func printReport(s loganalyzer.Stats, top []loganalyzer.KV) {
 	fmt.Printf("\nClass  : 2xx:%d 3xx:%d 4xx:%d 5xx:%d other:%d\n",
 		s.ByClass["2xx"], s.ByClass["3xx"], s.ByClass["4xx"], s.ByClass["5xx"], s.ByClass["other"])
 
-	fmt.Printf("Latency(ms) min:%d avg:%.1f p50:%d p95:%d p99:%d max:%d\n",
+	fmt.Printf("Latency(ms) min:%d avg:%.1f p50:%f p95:%f p99:%f max:%d\n",
 		s.LatMin, s.LatAvg, s.LatP50, s.LatP95, s.LatP99, s.LatMax)
 
 	fmt.Printf("\nTop endpoints:\n")

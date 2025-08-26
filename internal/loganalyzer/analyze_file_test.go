@@ -96,32 +96,41 @@ func BenchmarkAnalyzeFile_Large(b *testing.B) {
 	path := filepath.Join(dir, "large.jsonl")
 	const N = 100_000
 
-	// テストファイルの作成
-	f, err := os.Create(path)
-	require.NoError(b, err)
-	w := bufio.NewWriter(f)
-	rnd := rand.New(rand.NewSource(42))
-	routes := []string{"/tasks", "/tasks/{id}", "/health", "/quotes"}
-	statuses := []int{200, 201, 404, 500}
-	base := time.Date(2025, 8, 25, 0, 0, 0, 0, time.UTC)
-	for i := 0; i < N; i++ {
-		ts := base.Add(time.Duration(i) * time.Millisecond).UTC().Format(time.RFC3339Nano)
-		route := routes[rnd.Intn(len(routes))]
-		pathVal := route
-		st := statuses[rnd.Intn(len(statuses))]
-		lat := rnd.Intn(900) + 1 // 1..900 ms
-		line := fmt.Sprintf(`{"ts":"%s","method":"GET","path":"%s","route":"%s","status":%d,"bytes":%d,"latency_ms":%d}`, ts, pathVal, route, st, rnd.Intn(2048), lat)
-		_, err := w.WriteString(line + "\n")
-		require.NoError(b, err)
-	}
-	require.NoError(b, w.Flush())
-	require.NoError(b, f.Close())
+	check := func(label string, estimatedLines int) {
+		b.Run(label, func(b *testing.B) {
+			// テストファイルの作成
+			f, err := os.Create(path)
+			require.NoError(b, err)
+			w := bufio.NewWriter(f)
+			rnd := rand.New(rand.NewSource(42))
+			routes := []string{"/tasks", "/tasks/{id}", "/health", "/quotes"}
+			statuses := []int{200, 201, 404, 500}
+			base := time.Date(2025, 8, 25, 0, 0, 0, 0, time.UTC)
+			for i := 0; i < N; i++ {
+				ts := base.Add(time.Duration(i) * time.Millisecond).UTC().Format(time.RFC3339Nano)
+				route := routes[rnd.Intn(len(routes))]
+				pathVal := route
+				st := statuses[rnd.Intn(len(statuses))]
+				lat := rnd.Intn(900) + 1 // 1..900 ms
+				line := fmt.Sprintf(`{"ts":"%s","method":"GET","path":"%s","route":"%s","status":%d,"bytes":%d,"latency_ms":%d}`, ts, pathVal, route, st, rnd.Intn(2048), lat)
+				_, err := w.WriteString(line + "\n")
+				require.NoError(b, err)
+			}
+			require.NoError(b, w.Flush())
+			require.NoError(b, f.Close())
 
-	// 準備処理に時間がかかるため、ベンチマーク対象から除外
-	b.ResetTimer()
+			// 準備処理に時間がかかるため、ベンチマーク対象から除外
+			b.ResetTimer()
 
-	for i := 0; i < b.N; i++ {
-		_, _, err := AnalyzeFile(path, Options{GroupBy: "route", TopN: 5})
-		assert.NoError(b, err)
+			for i := 0; i < b.N; i++ {
+				_, _, err := AnalyzeFile(path, Options{GroupBy: "route", TopN: 5, EstimatedLines: estimatedLines})
+				assert.NoError(b, err)
+			}
+		})
 	}
+
+	check("without estimation", 0)
+	check("with exact estimation", N)
+	check("with smaller estimation", N/2)
+	check("with larger estimation", N*10)
 }

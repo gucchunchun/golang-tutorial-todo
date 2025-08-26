@@ -7,82 +7,113 @@ import (
 	"io"
 	"sort"
 	"time"
+
+	"gonum.org/v1/gonum/stat"
 )
 
-type AccessLog struct {
-	TS     time.Time `json:"ts"`
-	Method string    `json:"method"`
-	Path   string    `json:"path"`
-	Route  string    `json:"route"`
-	Status int       `json:"status"`
-	Bytes  int       `json:"bytes"`
-	// LatencyMS time.Duration の Milliseconds メゾットが int64 をリターンするため
-	LatencyMS int64 `json:"latency_ms"`
-}
-
+// Stats 集計結果
 type Stats struct {
 	Count    int
 	From, To time.Time
 	ByStatus map[int]int
-	ByClass  map[string]int // "2xx","4xx","5xx" 等
+	ByClass  map[string]int // 2xx/3xx/4xx/5xx/other
 	ByGroup  map[string]int // route or path
 	LatMin   int64
 	LatAvg   float64
-	LatP50   int64
-	LatP95   int64
-	LatP99   int64
+	LatP50   float64
+	LatP95   float64
+	LatP99   float64
 	LatMax   int64
 }
 
+// Options 解析オプション
 type Options struct {
-	GroupBy string // "route" or "path"
-	TopN    int
+	GroupBy        string // route | path
+	TopN           int
+	EstimatedLines int // 推定行数 (0 の場合はデフォルト 4096 キャパ)
 }
 
+// KV 上位エンドポイント表示用
 type KV struct {
 	Key   string
 	Count int
 }
 
+// accessLogRaw fallback 用構造体 (encoding/json 使用時)
+type accessLogRaw struct {
+	TS        string `json:"ts"`
+	Method    string `json:"method"`
+	Path      string `json:"path"`
+	Route     string `json:"route"`
+	Status    int    `json:"status"`
+	Bytes     int    `json:"bytes"`
+	LatencyMS int64  `json:"latency_ms"`
+}
+
+// interner 重複文字列を一度だけ保持
+type interner struct{ m map[string]string }
+
+func newInterner(capHint int) *interner { return &interner{m: make(map[string]string, capHint)} }
+func (in *interner) intern(s string) string {
+	if v, ok := in.m[s]; ok {
+		return v
+	}
+	in.m[s] = s
+	return s
+}
+
+// Analyze ログをストリーミング解析
 func Analyze(r io.Reader, opt Options) (Stats, []KV, error) {
 	sc := bufio.NewScanner(r)
+	s := Stats{ByStatus: make(map[int]int, 16), ByClass: make(map[string]int, 8), ByGroup: make(map[string]int, 256)}
+	var firstTS time.Time
+	var firstParsed bool
+	var lastTSStr string
+	routeIntern := newInterner(512)
+	pathIntern := newInterner(512)
+	// 使い回す Unmarshal 用構造体
+	var raw accessLogRaw
 	var (
-		latencies []int64
-		s         = Stats{
-			ByStatus: make(map[int]int),
-			ByClass:  make(map[string]int),
-			ByGroup:  make(map[string]int),
-		}
-		firstTS time.Time
+		latSum  int64
+		capHint int
 	)
-
-	/*
-		sc.Scan() 読み込みトークンが残っている限り、Bytes()/Text() で次のトークンを読み込み可能。
-		読み込めるトークンがなくなった場合にfalseを返す。
-	*/
+	if opt.EstimatedLines > 0 {
+		capHint = opt.EstimatedLines
+	} else {
+		capHint = 4096
+	}
+	latencies := make([]float64, 0, capHint)
 	for sc.Scan() {
-		var al AccessLog
-		// 壊れた行はスキップ
-		if err := json.Unmarshal(sc.Bytes(), &al); err != nil {
+		b := sc.Bytes()
+		raw = accessLogRaw{} // 前回値を消す
+		if err := json.Unmarshal(b, &raw); err != nil {
 			continue
 		}
-		if al.TS.IsZero() {
+		if raw.TS == "" {
 			continue
 		}
-		if firstTS.IsZero() {
-			firstTS = al.TS
-			s.From = al.TS
+		if !firstParsed {
+			ts, err := time.Parse(time.RFC3339Nano, raw.TS)
+			if err != nil {
+				continue
+			}
+			firstTS = ts
+			s.From = ts
+			firstParsed = true
 		}
-		s.To = al.TS
+		lastTSStr = raw.TS
 		s.Count++
-		s.ByStatus[al.Status]++
-		s.ByClass[classOf(al.Status)]++
-		key := al.Route
+		s.ByStatus[raw.Status]++
+		s.ByClass[classOf(raw.Status)]++
+		rStr := routeIntern.intern(raw.Route)
+		pStr := pathIntern.intern(raw.Path)
+		key := rStr
 		if opt.GroupBy == "path" {
-			key = al.Path
+			key = pStr
 		}
 		s.ByGroup[key]++
-		latencies = append(latencies, al.LatencyMS)
+		latSum += raw.LatencyMS
+		latencies = append(latencies, float64(raw.LatencyMS))
 	}
 	if err := sc.Err(); err != nil && !errors.Is(err, io.EOF) {
 		return Stats{}, nil, err
@@ -90,49 +121,22 @@ func Analyze(r io.Reader, opt Options) (Stats, []KV, error) {
 	if s.Count == 0 {
 		return s, nil, nil
 	}
-
-	// レイテンシーの最小・最大値
+	if lastTSStr != "" {
+		if ts, err := time.Parse(time.RFC3339Nano, lastTSStr); err == nil {
+			s.To = ts
+		} else {
+			s.To = firstTS
+		}
+	} else {
+		s.To = firstTS
+	}
 	sort.Slice(latencies, func(i, j int) bool { return latencies[i] < latencies[j] })
-	s.LatMin = latencies[0]
-	s.LatMax = latencies[len(latencies)-1]
-
-	// 平均
-	var sum int64
-	for _, v := range latencies {
-		sum += v
-	}
-	s.LatAvg = float64(sum) / float64(len(latencies))
-
-	// パーセンタイル
-	p := func(q float64) int64 {
-		n := len(latencies)
-		if n == 0 {
-			return 0
-		}
-		if q <= 0 {
-			return latencies[0]
-		}
-		if q >= 1 {
-			return latencies[n-1]
-		}
-		idx := q * float64(n-1)
-		lowerIdx := int(idx)
-		upperIdx := lowerIdx + 1
-		if upperIdx >= n {
-			upperIdx = lowerIdx
-		}
-		fraction := idx - float64(lowerIdx)
-
-		lowerValue := float64(latencies[lowerIdx])
-		upperValue := float64(latencies[upperIdx])
-
-		return int64(lowerValue + (upperValue-lowerValue)*fraction)
-	}
-	s.LatP50 = p(0.50)
-	s.LatP95 = p(0.95)
-	s.LatP99 = p(0.99)
-
-	// 上位 N（ByGroup）
+	s.LatMin = int64(latencies[0])
+	s.LatMax = int64(latencies[len(latencies)-1])
+	s.LatAvg = float64(latSum) / float64(len(latencies))
+	s.LatP50 = stat.Quantile(0.50, stat.Empirical, latencies, nil)
+	s.LatP95 = stat.Quantile(0.95, stat.Empirical, latencies, nil)
+	s.LatP99 = stat.Quantile(0.99, stat.Empirical, latencies, nil)
 	kvs := make([]KV, 0, len(s.ByGroup))
 	for k, c := range s.ByGroup {
 		kvs = append(kvs, KV{Key: k, Count: c})
@@ -144,7 +148,6 @@ func Analyze(r io.Reader, opt Options) (Stats, []KV, error) {
 	return s, kvs, nil
 }
 
-// classOf ステータスごとにクラスを返す
 func classOf(status int) string {
 	switch {
 	case status >= 200 && status < 300:

@@ -1,0 +1,63 @@
+テスト 実行前
+goos: darwin
+goarch: arm64
+pkg: golang/tutorial/todo
+cpu: Apple M1
+BenchmarkAppendSlice-8         	  526812	      2262 ns/op	   25208 B/op	      12 allocs/op
+BenchmarkAppendSliceBetter-8   	 1000000	      1023 ns/op	    8192 B/op	       1 allocs/op
+PASS
+テスト 実行後
+ok  	golang/tutorial/todo	3.296s
+?   	golang/tutorial/todo/cmd	[no test files]
+?   	golang/tutorial/todo/cmd/todo	[no test files]
+?   	golang/tutorial/todo/cmd/todo-server	[no test files]
+?   	golang/tutorial/todo/internal/adapters/convert	[no test files]
+?   	golang/tutorial/todo/internal/api	[no test files]
+?   	golang/tutorial/todo/internal/api/handlers	[no test files]
+PASS
+ok  	golang/tutorial/todo/internal/api/handlers/quotehdl	0.227s
+PASS
+ok  	golang/tutorial/todo/internal/api/handlers/taskhdl	0.196s
+PASS
+ok  	golang/tutorial/todo/internal/api/middleware/limitmw	0.195s
+PASS
+ok  	golang/tutorial/todo/internal/api/middleware/logmw	0.344s
+PASS
+ok  	golang/tutorial/todo/internal/api/middleware/recovermw	0.205s
+?   	golang/tutorial/todo/internal/app/bootstrap	[no test files]
+?   	golang/tutorial/todo/internal/app/cli	[no test files]
+?   	golang/tutorial/todo/internal/app/server	[no test files]
+?   	golang/tutorial/todo/internal/apperr	[no test files]
+?   	golang/tutorial/todo/internal/config	[no test files]
+PASS
+ok  	golang/tutorial/todo/internal/crypto	0.190s
+PASS
+ok  	golang/tutorial/todo/internal/db	0.201s
+PASS
+ok  	golang/tutorial/todo/internal/httpx	0.231s
+goos: darwin
+goarch: arm64
+pkg: golang/tutorial/todo/internal/loganalyzer
+cpu: Apple M1
+BenchmarkAnalyzeFile_Large/without_estimation-8         	       8	 139189141 ns/op	31321844 B/op	  800063 allocs/op
+BenchmarkAnalyzeFile_Large/with_exact_estimation-8      	       8	 139333286 ns/op	27701670 B/op	  800050 allocs/op
+BenchmarkAnalyzeFile_Large/with_smaller_estimation-8    	       8	 138845458 ns/op	29249246 B/op	  800052 allocs/op
+BenchmarkAnalyzeFile_Large/with_larger_estimation-8     	       8	 138465516 ns/op	34901452 B/op	  800038 allocs/op
+PASS
+ok  	golang/tutorial/todo/internal/loganalyzer	5.741s
+?   	golang/tutorial/todo/internal/logger	[no test files]
+?   	golang/tutorial/todo/internal/models	[no test files]
+PASS
+ok  	golang/tutorial/todo/internal/quote	0.227s
+PASS
+ok  	golang/tutorial/todo/internal/services/quotesvc	0.192s
+PASS
+ok  	golang/tutorial/todo/internal/services/tasksvc	0.211s
+PASS
+ok  	golang/tutorial/todo/internal/storage/json	0.207s
+?   	golang/tutorial/todo/internal/storage/mysql	[no test files]
+?   	golang/tutorial/todo/internal/utils	[no test files]
+PASS
+ok  	golang/tutorial/todo/internal/validation	0.212s
+PASS
+ok  	golang/tutorial/todo/testutils/httpxtest	0.204s
